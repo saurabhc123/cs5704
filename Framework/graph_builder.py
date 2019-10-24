@@ -18,9 +18,6 @@ class GraphBuilder():
             starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number], revision_number)
         return beginning
 
-
-
-
     def build_graph_from_subsequent_revisions(self, left_nodes, right:[str], revision_number):
         ptr_left = 0
         ptr_right = 0
@@ -28,37 +25,30 @@ class GraphBuilder():
         while True:
             left_node = left_nodes[ptr_left]
             if self.evaluate_match(left_node.content, right[ptr_right]) == 'u':
-                new_right_node = Node("u", ptr_right + 1, right[ptr_right], revision_number)
-                self.G.add_node(new_right_node)
+                new_right_node = Node("u", ptr_right + 1, right[ptr_right], revision_number + 1)
+                self.G.add_node(new_right_node,id = new_right_node.get_node_id())
                 self.G.add_edge(left_node, new_right_node)
-                print(list(self.G.nodes(data=True)))
                 right_nodes.append(new_right_node)
                 ptr_left = ptr_left + 1
                 ptr_right = ptr_right + 1
                 continue
 
             if self.evaluate_match(left_node.content, right[ptr_right]) == 'c':
-                new_right_node = Node("c", ptr_right + 1, right[ptr_right], revision_number)
-                self.G.add_node(new_right_node)
+                new_right_node = Node("c", ptr_right + 1, right[ptr_right], revision_number + 1)
+                self.G.add_node(new_right_node,id = new_right_node.get_node_id())
                 self.G.add_edge(left_node, new_right_node)
-                print(list(self.G.nodes(data=True)))
                 right_nodes.append(new_right_node)
                 ptr_right = ptr_right + 1
                 continue
 
             #Unmatched
-            if len(self.G.out_edges(self.G.nodes[left_node]["id"])) > 0:
+            if self.G.degree(left_node) > 0:
                 ptr_left = ptr_left + 1
-
 
             if ptr_left > len(left_nodes) or ptr_right > len(right):
                 break
         print(list(self.G.nodes(data=True)))
         return right_nodes
-
-
-
-
 
     def evaluate_match(self, string_left:str, string_right):
         if string_left == string_right:
