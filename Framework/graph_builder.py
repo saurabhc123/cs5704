@@ -65,14 +65,27 @@ class GraphBuilder():
                 ptr_right = ptr_right + 1
                 continue
 
+            # if the node contents do not match:
+            # Condition 1: keep left static, look ahead 1 on right side & compare; if they don't match, then left has
+            # been deleted, want to locally increment left to keep track of position; if they do match, mark as 'u',
+            # increment left, keep right the same (might need to check in-degree values)
+            # Condition 2: keep right static, look ahead 1 on left & compare; don't match, if left doesn't have an
+            # out-degree, then mark right as 'a', locally increment right; do match, mark as 'u', increment right, keep
+            # left the same (in-degree)
+
+            # if self.evaluate_match(left_node.content, right[ptr_right]) == 'unmatched':
+                # if (ptr_right + 1 < len(right)):
+                #     if self.evaluate_match(left_node.content, right[ptr_right + 1]) == 'unmatched':
+                #         graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[ptr_left]]['id']) - 1]
+                #         graph_node.label = "d"
+                #         ptr_left = ptr_left + 1
+                #     elif self.evaluate_match(left_node.content, right[ptr_right + 1]) == 'u':
 
 
             #Unmatched
             if self.G.out_degree(left_node) > 0:
                 ptr_left = ptr_left + 1
 
-
-        print(list(self.G.nodes(data=True)))
         return right_nodes
 
     def evaluate_match(self, string_left:str, string_right):
