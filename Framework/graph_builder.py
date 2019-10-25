@@ -41,7 +41,7 @@ class GraphBuilder():
             # Find the left node on the graph. Change its label.
             if ptr_left < len(left_nodes) and ptr_right >= len(right):
                 for i in range(ptr_left, len(left_nodes)):
-                    if self.G.degree(left_nodes[i]) > 0:
+                    if self.G.out_degree(left_nodes[i]) > 0:
                         continue
                     graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[i]]['id']) - 1]
                     graph_node.label = "d"
@@ -68,7 +68,7 @@ class GraphBuilder():
 
 
             #Unmatched
-            if self.G.degree(left_node) > 0:
+            if self.G.out_degree(left_node) > 0:
                 ptr_left = ptr_left + 1
 
 
