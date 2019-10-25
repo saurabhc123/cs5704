@@ -23,10 +23,34 @@ class GraphBuilder():
         ptr_right = 0
         right_nodes = []
         while True:
+            # if no more to process on the right side and the left side
+            if ptr_left >= len(left_nodes) and ptr_right >= len(right):
+                break
+
+            # if no more to process on the left side, but more on the right side
+            # Iterate through the right nodes, and add all of them (added) as the right nodes array and the graph
+            if ptr_left >= len(left_nodes) and ptr_right < len(right):
+                for i in range(ptr_right, len(right)):
+                    new_right_node = Node("a", ptr_right + 1, right[ptr_right], revision_number + 1)
+                    right_nodes.append(new_right_node)
+                    self.G.add_node(new_right_node, id=new_right_node.get_node_id())
+                break
+
+            # If more to process on the left side and no more to process on the right side,
+            # Iterate through the left nodes, and mark all of them as (deleted) the left nodes array.
+            # Find the left node on the graph. Change its label.
+            if ptr_left < len(left_nodes) and ptr_right >= len(right):
+                for i in range(ptr_left, len(left_nodes)):
+                    if self.G.degree(left_nodes[i]) > 0:
+                        continue
+                    graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[i]]['id']) - 1]
+                    graph_node.label = "d"
+                break
+
             left_node = left_nodes[ptr_left]
             if self.evaluate_match(left_node.content, right[ptr_right]) == 'u':
                 new_right_node = Node("u", ptr_right + 1, right[ptr_right], revision_number + 1)
-                self.G.add_node(new_right_node,id = new_right_node.get_node_id())
+                self.G.add_node(new_right_node, id=new_right_node.get_node_id())
                 self.G.add_edge(left_node, new_right_node)
                 right_nodes.append(new_right_node)
                 ptr_left = ptr_left + 1
@@ -41,12 +65,13 @@ class GraphBuilder():
                 ptr_right = ptr_right + 1
                 continue
 
+
+
             #Unmatched
             if self.G.degree(left_node) > 0:
                 ptr_left = ptr_left + 1
 
-            if ptr_left > len(left_nodes) or ptr_right > len(right):
-                break
+
         print(list(self.G.nodes(data=True)))
         return right_nodes
 
@@ -69,3 +94,4 @@ class GraphBuilder():
             line_number = line_number + 1
             self.G.add_node(new_node, id = new_node.get_node_id())
         return nodes
+
