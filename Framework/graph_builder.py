@@ -13,10 +13,9 @@ class GraphBuilder():
         first_revision = revisions[0]
         starting_nodes = self.initialize_first_revision(first_revision)
         print(list(self.G.nodes(data=True)))
-        beginning = starting_nodes
         for revision_number in range(1, len(revisions)):
             starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number], revision_number)
-        return beginning
+        return starting_nodes
 
     def build_graph_from_subsequent_revisions(self, left_nodes, right:[str], revision_number):
         ptr_left = 0
@@ -86,8 +85,6 @@ class GraphBuilder():
                 ptr_left = ptr_left + 1
 
             ptr_left, ptr_right = self.handle_unmatched(ptr_left, ptr_right, left_nodes, right, right_nodes)
-
-
 
         return right_nodes
 
