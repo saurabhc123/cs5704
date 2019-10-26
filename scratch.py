@@ -5,10 +5,10 @@ import Framework.graph_builder as gb
 
 rev1 = [
     "a",
-    "b",
+    "b.1",
+    "b.2",
     "c",
-    "d",
-    "e"
+    "b.3"
 ]
 
 # rev2 = [
@@ -22,10 +22,8 @@ rev2 = [
     "a",
     "b.1",
     "b.2",
-    "c",
-    "d",
-    "e.1",
-    "f"
+    "b.3",
+    "c"
 ]
 
 rev3 = [
@@ -48,7 +46,7 @@ rev4 = [
 
 def main():
     # revisions = [rev1, rev2, rev3, rev4]
-    revisions = [rev1, rev2, rev3]
+    revisions = [rev1, rev2]
     gb_obj = gb.GraphBuilder()
     beginning = gb_obj.build_graph(revisions)
 

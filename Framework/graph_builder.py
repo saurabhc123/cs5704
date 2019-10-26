@@ -81,12 +81,65 @@ class GraphBuilder():
                 #         ptr_left = ptr_left + 1
                 #     elif self.evaluate_match(left_node.content, right[ptr_right + 1]) == 'u':
 
-
-            #Unmatched
+                # Unmatched
             if self.G.out_degree(left_node) > 0:
                 ptr_left = ptr_left + 1
 
+            ptr_left, ptr_right = self.handle_unmatched(ptr_left, ptr_right, left_nodes, right, right_nodes)
+
+
+
         return right_nodes
+
+    #   c       b.4
+    #   b.3     c
+    def handle_unmatched(self, ptr_left:int, ptr_right:int, left_nodes:[Node], right, right_nodes:[Node]):
+        left_revision_number = left_nodes[ptr_left].revision_number
+        right_revision_number = left_revision_number + 1
+        # Increment the left ptr
+        ptr_left = ptr_left + 1
+        # If left_ptr out of bounds
+        if ptr_left >= len(left_nodes):
+            ptr_left = ptr_left - 1
+            # right is an "a" add to graph
+            new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
+            self.G.add_node(new_right_node, id=new_right_node.get_node_id())
+            right_nodes.append(new_right_node)
+            # move right ptr by 1
+            ptr_right = ptr_right + 1
+            return ptr_left, ptr_right
+        # Compare left_ptr and right
+        left_node = left_nodes[ptr_left]
+        match_status = self.evaluate_match(left_node.content, right[ptr_right])
+        if "unmatched" in match_status:
+            # Unmatched
+            # Create right node as "a" and add to the graph
+            # Add to the right_nodes list
+            new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
+            self.G.add_node(new_right_node, id=new_right_node.get_node_id())
+            right_nodes.append(new_right_node)
+            ptr_right = ptr_right + 1
+            ptr_left = ptr_left - 1
+            return ptr_left, ptr_right
+        else:
+            # Mark left_ptr - 1 as "d"
+            left_node_to_be_changed = list(self.G.nodes)[int(self.G.nodes[left_nodes[ptr_left - 1]]['id']) - 1]
+            left_node_to_be_changed.label = "d"
+            # Create right node as "u" and add to the graph
+            new_right_node = Node("u", ptr_right + 1, right[ptr_right], right_revision_number)
+            self.G.add_node(new_right_node, id=new_right_node.get_node_id())
+            # Add to the right_nodes list
+            right_nodes.append(new_right_node)
+            # Add an edge between left_ptr and right_ptr + 1
+            self.G.add_edge(left_node, new_right_node)
+            # Increment left_ptr and right_ptr by 1
+            ptr_right = ptr_right + 1
+            ptr_left = ptr_left + 1
+            return ptr_left, ptr_right
+
+
+
+
 
     def evaluate_match(self, string_left:str, string_right):
         if string_left == string_right:
