@@ -5,8 +5,9 @@ from fuzzywuzzy import fuzz
 
 class GraphBuilder():
 
-    def __init__(self):
+    def __init__(self, matcher):
         self.G = nx.MultiDiGraph()
+        self.matcher = matcher
         pass
 
     def build_graph(self, revisions):
@@ -47,7 +48,7 @@ class GraphBuilder():
                 break
 
             left_node = left_nodes[ptr_left]
-            if self.evaluate_match(left_node.content, right[ptr_right]) == 'u':
+            if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'u':
                 new_right_node = Node("u", ptr_right + 1, right[ptr_right], revision_number + 1)
                 self.G.add_node(new_right_node, id=new_right_node.get_node_id())
                 self.G.add_edge(left_node, new_right_node)
@@ -56,7 +57,7 @@ class GraphBuilder():
                 ptr_right = ptr_right + 1
                 continue
 
-            if self.evaluate_match(left_node.content, right[ptr_right]) == 'c':
+            if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'c':
                 new_right_node = Node("c", ptr_right + 1, right[ptr_right], revision_number + 1)
                 self.G.add_node(new_right_node,id = new_right_node.get_node_id())
                 self.G.add_edge(left_node, new_right_node)
@@ -107,7 +108,7 @@ class GraphBuilder():
             return ptr_left, ptr_right
         # Compare left_ptr and right
         left_node = left_nodes[ptr_left]
-        match_status = self.evaluate_match(left_node.content, right[ptr_right])
+        match_status = self.matcher.evaluate_match(left_node.content, right[ptr_right])
         if "unmatched" in match_status:
             # Unmatched
             # Create right node as "a" and add to the graph
@@ -134,19 +135,6 @@ class GraphBuilder():
             ptr_left = ptr_left + 1
             return ptr_left, ptr_right
 
-
-
-
-
-    def evaluate_match(self, string_left:str, string_right):
-        if string_left == string_right:
-            return 'u'
-
-        #partial match
-        if fuzz.partial_ratio(string_left, string_right) > 90:
-            return 'c'
-
-        return 'unmatched'
 
     def initialize_first_revision(self, first_revision):
         nodes = []

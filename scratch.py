@@ -1,7 +1,6 @@
 import networkx as nx
 import Framework.graph_builder as gb
-
-
+from Framework.Matchers.simple_matcher import SimpleMatcher
 
 rev1 = [
     "a",
@@ -77,7 +76,8 @@ def test1():
     ]
 
     revisions = [rev1, rev2]
-    gb_obj = gb.GraphBuilder()
+    simple_matcher = SimpleMatcher()
+    gb_obj = gb.GraphBuilder(simple_matcher)
     beginning = gb_obj.build_graph(revisions)
 
     assert beginning[3].label == "u"
