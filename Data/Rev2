@@ -43,8 +43,7 @@ class GraphBuilder():
                 for i in range(ptr_left, len(left_nodes)):
                     if self.G.out_degree(left_nodes[i]) > 0:
                         continue
-                    graph_node = self.get_node_from_graph(left_nodes, ptr_left)
-                    #graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[i]]['id']) - 1]
+                    graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[i]]['id']) - 1]
                     graph_node.label = "d"
                 break
 
@@ -123,7 +122,7 @@ class GraphBuilder():
             return ptr_left, ptr_right
         else:
             # Mark left_ptr - 1 as "d"
-            left_node_to_be_changed = self.get_node_from_graph(left_nodes, ptr_left - 1)
+            left_node_to_be_changed = list(self.G.nodes)[int(self.G.nodes[left_nodes[ptr_left - 1]]['id']) - 1]
             left_node_to_be_changed.label = "d"
             # Create right node as "u" and add to the graph
             new_right_node = Node("u", ptr_right + 1, right[ptr_right], right_revision_number)
@@ -137,11 +136,6 @@ class GraphBuilder():
             ptr_left = ptr_left + 1
             return ptr_left, ptr_right
 
-    def get_node_from_graph(self, left_nodes, ptr_left):
-        for (key, value) in self.G.nodes(data=True):
-            if value['id'] == left_nodes[ptr_left].get_node_id():
-                return key
-        return None
 
     def initialize_first_revision(self, first_revision):
         nodes = []
