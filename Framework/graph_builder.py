@@ -14,9 +14,12 @@ class GraphBuilder():
         first_revision = revisions[0]
         starting_nodes = self.initialize_first_revision(first_revision)
         print(list(self.G.nodes(data=True)))
+        history_graph = []
+        history_graph.append(starting_nodes)
         for revision_number in range(1, len(revisions)):
             starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number], revision_number)
-        return starting_nodes
+            history_graph.append(starting_nodes)
+        return history_graph
 
     def build_graph_from_subsequent_revisions(self, left_nodes, right:[str], revision_number):
         ptr_left = 0
@@ -115,6 +118,8 @@ class GraphBuilder():
             # Unmatched
             # Create right node as "a" and add to the graph
             # Add to the right_nodes list
+            # left_node_to_be_changed = self.get_node_from_graph(left_nodes, ptr_left - 1)
+            # left_node_to_be_changed.label = "d"
             new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
             self.G.add_node(new_right_node, id=new_right_node.get_node_id())
             right_nodes.append(new_right_node)
