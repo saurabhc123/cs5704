@@ -84,6 +84,7 @@ class GraphBuilder():
                 # Unmatched
             if self.G.out_degree(left_node) > 0:
                 ptr_left = ptr_left + 1
+                continue
 
             ptr_left, ptr_right = self.handle_unmatched(ptr_left, ptr_right, left_nodes, right, right_nodes)
 
