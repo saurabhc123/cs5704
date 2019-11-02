@@ -11,7 +11,7 @@ class NetworkxGraph(Graph):
         #NetworkxGraph.G = self.G
 
     def add_node(self, node: Node, node_id: str):
-        print(node_id)
+        #print(node_id)
         self.G.add_node(node, id=node_id)
 
     def add_edge(self, left_node: Node, new_right_node: Node):
