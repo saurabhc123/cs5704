@@ -6,7 +6,7 @@ from fuzzywuzzy import fuzz
 class GraphBuilder():
 
     def __init__(self, matcher, graph: Graph):
-        self.G = graph
+        self.graph = graph
         self.matcher = matcher
         pass
 
@@ -35,7 +35,7 @@ class GraphBuilder():
                 for i in range(ptr_right, len(right)):
                     new_right_node = Node("a", ptr_right + 1, right[ptr_right], revision_number + 1)
                     right_nodes.append(new_right_node)
-                    self.G.add_node(new_right_node, id=new_right_node.get_node_id())
+                    self.graph.add_node(new_right_node, id=new_right_node.get_node_id())
                 break
 
             # If more to process on the left side and no more to process on the right side,
@@ -43,7 +43,7 @@ class GraphBuilder():
             # Find the left node on the graph. Change its label.
             if ptr_left < len(left_nodes) and ptr_right >= len(right):
                 for i in range(ptr_left, len(left_nodes)):
-                    if self.G.out_degree(left_nodes[i]) > 0:
+                    if self.graph.out_degree(left_nodes[i]) > 0:
                         continue
                     graph_node = self.get_node_from_graph(left_nodes, ptr_left)
                     #graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[i]]['id']) - 1]
@@ -53,8 +53,8 @@ class GraphBuilder():
             left_node = left_nodes[ptr_left]
             if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'u':
                 new_right_node = Node("u", ptr_right + 1, right[ptr_right], revision_number + 1)
-                self.G.add_node(new_right_node, node_id=new_right_node.get_node_id())
-                self.G.add_edge(left_node, new_right_node)
+                self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
+                self.graph.add_edge(left_node, new_right_node)
                 right_nodes.append(new_right_node)
                 ptr_left = ptr_left + 1
                 ptr_right = ptr_right + 1
@@ -62,14 +62,14 @@ class GraphBuilder():
 
             if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'c':
                 new_right_node = Node("c", ptr_right + 1, right[ptr_right], revision_number + 1)
-                self.G.add_node(new_right_node, node_id = new_right_node.get_node_id())
-                self.G.add_edge(left_node, new_right_node)
+                self.graph.add_node(new_right_node, node_id = new_right_node.get_node_id())
+                self.graph.add_edge(left_node, new_right_node)
                 right_nodes.append(new_right_node)
                 ptr_right = ptr_right + 1
                 continue
 
                 # Unmatched
-            if self.G.out_degree(left_node) > 0:
+            if self.graph.out_degree(left_node) > 0:
                 ptr_left = ptr_left + 1
                 continue
 
@@ -89,7 +89,7 @@ class GraphBuilder():
             ptr_left = ptr_left - 1
             # right is an "a" add to graph
             new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
-            self.G.add_node(new_right_node, node_id=new_right_node.get_node_id())
+            self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
             right_nodes.append(new_right_node)
             # move right ptr by 1
             ptr_right = ptr_right + 1
@@ -104,7 +104,7 @@ class GraphBuilder():
             # left_node_to_be_changed = self.get_node_from_graph(left_nodes, ptr_left - 1)
             # left_node_to_be_changed.label = "d"
             new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
-            self.G.add_node(new_right_node, node_id=new_right_node.get_node_id())
+            self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
             right_nodes.append(new_right_node)
             ptr_right = ptr_right + 1
             ptr_left = ptr_left - 1
@@ -115,11 +115,11 @@ class GraphBuilder():
             left_node_to_be_changed.label = "d"
             # Create right node as "u" and add to the graph
             new_right_node = Node("u", ptr_right + 1, right[ptr_right], right_revision_number)
-            self.G.add_node(new_right_node, node_id=new_right_node.get_node_id())
+            self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
             # Add to the right_nodes list
             right_nodes.append(new_right_node)
             # Add an edge between left_ptr and right_ptr + 1
-            self.G.add_edge(left_node, new_right_node)
+            self.graph.add_edge(left_node, new_right_node)
             # Increment left_ptr and right_ptr by 1
             ptr_right = ptr_right + 1
             ptr_left = ptr_left + 1
@@ -127,7 +127,7 @@ class GraphBuilder():
 
     def get_node_from_graph(self, left_nodes, ptr_left):
         node_id_to_search = left_nodes[ptr_left].get_node_id()
-        return self.G.find_node_in_graph(node_id_to_search)
+        return self.graph.find_node_in_graph(node_id_to_search)
 
     def initialize_first_revision(self, first_revision):
         nodes = []
@@ -136,6 +136,6 @@ class GraphBuilder():
             new_node = Node('a', line_number, line_content, 1)
             nodes.append(new_node)
             line_number = line_number + 1
-            self.G.add_node(new_node, node_id = new_node.get_node_id())
+            self.graph.add_node(new_node, node_id = new_node.get_node_id())
         return nodes
 
