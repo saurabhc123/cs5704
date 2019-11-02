@@ -1,5 +1,5 @@
 import networkx as nx
-from Framework.node import Node
+from Framework.self import Node
 from fuzzywuzzy import fuzz
 
 
@@ -38,7 +38,7 @@ class GraphBuilder():
 
             # If more to process on the left side and no more to process on the right side,
             # Iterate through the left nodes, and mark all of them as (deleted) the left nodes array.
-            # Find the left node on the graph. Change its label.
+            # Find the left self on the graph. Change its label.
             if ptr_left < len(left_nodes) and ptr_right >= len(right):
                 for i in range(ptr_left, len(left_nodes)):
                     if self.G.out_degree(left_nodes[i]) > 0:
@@ -65,7 +65,7 @@ class GraphBuilder():
                 ptr_right = ptr_right + 1
                 continue
 
-            # if the node contents do not match:
+            # if the self contents do not match:
             # Condition 1: keep left static, look ahead 1 on right side & compare; if they don't match, then left has
             # been deleted, want to locally increment left to keep track of position; if they do match, mark as 'u',
             # increment left, keep right the same (might need to check in-degree values)
@@ -112,7 +112,7 @@ class GraphBuilder():
         match_status = self.matcher.evaluate_match(left_node.content, right[ptr_right])
         if "unmatched" in match_status:
             # Unmatched
-            # Create right node as "a" and add to the graph
+            # Create right self as "a" and add to the graph
             # Add to the right_nodes list
             new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
             self.G.add_node(new_right_node, id=new_right_node.get_node_id())
@@ -124,7 +124,7 @@ class GraphBuilder():
             # Mark left_ptr - 1 as "d"
             left_node_to_be_changed = list(self.G.nodes)[int(self.G.nodes[left_nodes[ptr_left - 1]]['id']) - 1]
             left_node_to_be_changed.label = "d"
-            # Create right node as "u" and add to the graph
+            # Create right self as "u" and add to the graph
             new_right_node = Node("u", ptr_right + 1, right[ptr_right], right_revision_number)
             self.G.add_node(new_right_node, id=new_right_node.get_node_id())
             # Add to the right_nodes list

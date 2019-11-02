@@ -1,6 +1,7 @@
 import networkx as nx
 import Framework.graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
+from Implementations.Graphs.networkx_graph import NetworkxGraph
 
 rev1 = [
     "a",
@@ -69,8 +70,9 @@ def test_check_displacement():
     ]
 
     revisions = [rev1, rev2]
+    networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher)
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     beginning = gb_obj.build_graph(revisions)
 
     assert beginning[1][3].label == "u"
@@ -95,8 +97,9 @@ def test_mutation_of_lines():
     ]
     beginning = None
     revisions = [rev1, rev2]
+    networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher)
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     beginning = gb_obj.build_graph(revisions)
 
     assert beginning[1][0].label == "u"
@@ -134,8 +137,9 @@ def test_right_addition():
     ]
     beginning = None
     revisions = [rev1, rev2]
+    networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher)
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     beginning = gb_obj.build_graph(revisions)
 
     assert beginning[0][2].label == "a"
@@ -164,8 +168,9 @@ def test_blanks():
     ]
     beginning = None
     revisions = [rev1, rev2]
+    networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher)
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     beginning = gb_obj.build_graph(revisions)
 
     assert beginning[0][1].label == "a"
@@ -187,8 +192,9 @@ def test_with_actual_files():
     rev1 = ReadTextFromFile("Data/Rev1")
     rev2 = ReadTextFromFile("Data/Rev2")
     revisions = [rev1, rev2]
+    networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher)
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     beginning = gb_obj.build_graph(revisions)
     j = 0
 
