@@ -16,11 +16,12 @@ class GraphBuilder():
         history_graph = []
         history_graph.append(starting_nodes)
         for revision_number in range(1, len(revisions)):
-            starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number], revision_number)
+            starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number],
+                                                                        revision_number)
             history_graph.append(starting_nodes)
         return history_graph
 
-    def build_graph_from_subsequent_revisions(self, left_nodes, right:[str], revision_number):
+    def build_graph_from_subsequent_revisions(self, left_nodes, right: [str], revision_number):
         ptr_left = 0
         ptr_right = 0
         right_nodes = []
@@ -35,7 +36,7 @@ class GraphBuilder():
                 for i in range(ptr_right, len(right)):
                     new_right_node = Node("a", ptr_right + 1, right[ptr_right], revision_number + 1)
                     right_nodes.append(new_right_node)
-                    self.graph.add_node(new_right_node, id=new_right_node.get_node_id())
+                    self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
                 break
 
             # If more to process on the left side and no more to process on the right side,
@@ -46,7 +47,7 @@ class GraphBuilder():
                     if self.graph.out_degree(left_nodes[i]) > 0:
                         continue
                     graph_node = self.get_node_from_graph(left_nodes, ptr_left)
-                    #graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[i]]['id']) - 1]
+                    # graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[i]]['id']) - 1]
                     graph_node.label = "d"
                 break
 
@@ -62,7 +63,7 @@ class GraphBuilder():
 
             if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'c':
                 new_right_node = Node("c", ptr_right + 1, right[ptr_right], revision_number + 1)
-                self.graph.add_node(new_right_node, node_id = new_right_node.get_node_id())
+                self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
                 self.graph.add_edge(left_node, new_right_node)
                 right_nodes.append(new_right_node)
                 ptr_right = ptr_right + 1
@@ -79,7 +80,7 @@ class GraphBuilder():
 
     #   c       b.4
     #   b.3     c
-    def handle_unmatched(self, ptr_left:int, ptr_right:int, left_nodes:[Node], right, right_nodes:[Node]):
+    def handle_unmatched(self, ptr_left: int, ptr_right: int, left_nodes: [Node], right, right_nodes: [Node]):
         left_revision_number = left_nodes[ptr_left].revision_number
         right_revision_number = left_revision_number + 1
         # Increment the left ptr
@@ -136,6 +137,5 @@ class GraphBuilder():
             new_node = Node('a', line_number, line_content, 1)
             nodes.append(new_node)
             line_number = line_number + 1
-            self.graph.add_node(new_node, node_id = new_node.get_node_id())
+            self.graph.add_node(new_node, node_id=new_node.get_node_id())
         return nodes
-
