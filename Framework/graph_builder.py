@@ -114,17 +114,29 @@ class GraphBuilder():
             # Mark left_ptr - 1 as "d"
             left_node_to_be_changed = self.get_node_from_graph(left_nodes, ptr_left - 1)
             left_node_to_be_changed.label = "d"
-            # Create right node as "u" and add to the graph
-            new_right_node = Node("u", ptr_right + 1, right[ptr_right], right_revision_number)
-            self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
-            # Add to the right_nodes list
-            right_nodes.append(new_right_node)
-            # Add an edge between left_ptr and right_ptr + 1
-            self.graph.add_edge(left_node, new_right_node)
-            # Increment left_ptr and right_ptr by 1
-            ptr_right = ptr_right + 1
-            ptr_left = ptr_left + 1
-            return ptr_left, ptr_right
+            if "c" in match_status:
+                # Create right node as "c" and add to the graph
+                new_right_node = Node("c", ptr_right + 1, right[ptr_right], right_revision_number)
+                self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
+                # Add to the right_nodes list
+                right_nodes.append(new_right_node)
+                # Add an edge between left_ptr and right_ptr + 1
+                self.graph.add_edge(left_node, new_right_node)
+                # Increment right_ptr by 1
+                ptr_right = ptr_right + 1
+                return ptr_left, ptr_right
+            else:
+                # Create right node as "u" and add to the graph
+                new_right_node = Node("u", ptr_right + 1, right[ptr_right], right_revision_number)
+                self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
+                # Add to the right_nodes list
+                right_nodes.append(new_right_node)
+                # Add an edge between left_ptr and right_ptr + 1
+                self.graph.add_edge(left_node, new_right_node)
+                # Increment left_ptr and right_ptr by 1
+                ptr_right = ptr_right + 1
+                ptr_left = ptr_left + 1
+                return ptr_left, ptr_right
 
     def get_node_from_graph(self, left_nodes, ptr_left):
         node_id_to_search = left_nodes[ptr_left].get_node_id()
