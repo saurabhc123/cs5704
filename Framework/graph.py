@@ -16,3 +16,6 @@ class Graph(ABC):
 
     def find_node_in_graph(self, node_id):
         pass
+
+    def serialize_graph(self):
+        pass

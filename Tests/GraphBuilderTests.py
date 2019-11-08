@@ -2,6 +2,8 @@ import networkx as nx
 import Framework.graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
 from Implementations.Graphs.networkx_graph import NetworkxGraph
+from Implementations.Serializers.csv_file_serializer import CsvFileSerializer
+from Implementations.Serializers.in_memory_serializer import InMemorySerializer
 
 rev1 = [
     "a",
@@ -198,13 +200,41 @@ def test_with_actual_files():
     beginning = gb_obj.build_graph(revisions)
     j = 0
 
+def test_serialization():
+    rev1 = [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "fd",
+        "z"
+    ]
 
+    rev2 = [
+        "a",
+        "x",
+        "c",
+        "e",
+        "y",
+        "z.1"
+    ]
+    beginning = None
+    revisions = [rev1, rev2]
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    simple_matcher = SimpleMatcher()
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    beginning = gb_obj.build_graph(revisions)
+    gb_obj.graph.serialize_graph()
+    # assert beginning[0][1].label == "a"
 
 # test_with_actual_files()
 # test_check_displacement()
 # test_mutation_of_lines()
-test_right_addition()
-test_blanks()
+test_serialization()
+# test_right_addition()
+# test_blanks()
 
 
 

@@ -8,13 +8,11 @@ class GraphBuilder():
     def __init__(self, matcher, graph: Graph):
         self.graph = graph
         self.matcher = matcher
-        pass
 
     def build_graph(self, revisions):
         first_revision = revisions[0]
         starting_nodes = self.initialize_first_revision(first_revision)
-        history_graph = []
-        history_graph.append(starting_nodes)
+        history_graph = [starting_nodes]
         for revision_number in range(1, len(revisions)):
             starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number],
                                                                         revision_number)
@@ -115,7 +113,7 @@ class GraphBuilder():
             left_node_to_be_changed = self.get_node_from_graph(left_nodes, ptr_left - 1)
             left_node_to_be_changed.label = "d"
             # Create right node as "u" and add to the graph
-            new_right_node = Node("u", ptr_right + 1, right[ptr_right], right_revision_number)
+            new_right_node = Node(match_status, ptr_right + 1, right[ptr_right], right_revision_number)
             self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
             # Add to the right_nodes list
             right_nodes.append(new_right_node)
@@ -139,3 +137,5 @@ class GraphBuilder():
             line_number = line_number + 1
             self.graph.add_node(new_node, node_id=new_node.get_node_id())
         return nodes
+
+
