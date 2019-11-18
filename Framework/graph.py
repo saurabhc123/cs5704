@@ -16,3 +16,12 @@ class Graph(ABC):
 
     def find_node_in_graph(self, node_id):
         pass
+
+    def predecessors(self, node: Node):
+        pass
+
+    def successors(self, node: Node):
+        pass
+
+    def clear(self):
+        pass

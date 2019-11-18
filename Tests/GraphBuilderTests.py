@@ -5,6 +5,12 @@ from Implementations.Graphs.networkx_graph import NetworkxGraph
 
 rev1 = [
     "a",
+    "b",
+    "c",
+]
+
+rev2 = [
+    "a",
     "b.1",
     "b.2",
     "c",
@@ -18,7 +24,7 @@ rev1 = [
 #     "e.1"
 # ]
 
-rev2 = [
+rev3 = [
     "a",
     "b.1",
     "b.2",
@@ -26,7 +32,7 @@ rev2 = [
     "c"
 ]
 
-rev3 = [
+rev4 = [
     "a.1",
     "b.1",
     "b.2",
@@ -36,8 +42,9 @@ rev3 = [
     "e.2"
 ]
 
-rev4 = [
-    "b.1",
+rev5 = [
+    "b.1.1",
+    "b.1.2",
     "b.2",
     "d",
     "e.2"
@@ -51,6 +58,17 @@ rev4 = [
 #     beginning = gb_obj.build_graph(revisions)
 #
 # main()
+
+
+def large_test():
+    revisions = [rev1, rev2, rev3, rev4, rev5]
+    networkx_graph = NetworkxGraph()
+    simple_matcher = SimpleMatcher()
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    beginning = gb_obj.build_graph(revisions)
+    print(beginning[1][1].content)
+    gb_obj.slice_line(2, 2)
+
 
 def test_check_displacement():
     rev1 = [
@@ -74,6 +92,7 @@ def test_check_displacement():
     simple_matcher = SimpleMatcher()
     gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     beginning = gb_obj.build_graph(revisions)
+    gb_obj.slice_line(2, 1)
 
     assert beginning[1][3].label == "u"
     assert beginning[1][4].label == "a"
@@ -196,15 +215,16 @@ def test_with_actual_files():
     simple_matcher = SimpleMatcher()
     gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     beginning = gb_obj.build_graph(revisions)
-    j = 0
-
+    print(beginning[1][7].content)
+    gb_obj.slice_line(1, 7)
 
 
 # test_with_actual_files()
 # test_check_displacement()
 # test_mutation_of_lines()
-test_right_addition()
-test_blanks()
+# test_right_addition()
+# test_blanks()
+large_test()
 
 
 

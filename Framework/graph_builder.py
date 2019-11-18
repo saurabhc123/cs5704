@@ -1,5 +1,7 @@
 from Framework.graph import Graph
 from Framework.node import Node
+import networkx as nx
+import matplotlib.pyplot as plt
 from fuzzywuzzy import fuzz
 
 
@@ -13,8 +15,7 @@ class GraphBuilder():
     def build_graph(self, revisions):
         first_revision = revisions[0]
         starting_nodes = self.initialize_first_revision(first_revision)
-        history_graph = []
-        history_graph.append(starting_nodes)
+        history_graph = [starting_nodes]
         for revision_number in range(1, len(revisions)):
             starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number],
                                                                         revision_number)
@@ -35,8 +36,8 @@ class GraphBuilder():
             if ptr_left >= len(left_nodes) and ptr_right < len(right):
                 for i in range(ptr_right, len(right)):
                     new_right_node = Node("a", ptr_right + 1, right[ptr_right], revision_number + 1)
-                    right_nodes.append(new_right_node)
                     self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
+                    right_nodes.append(new_right_node)
                 break
 
             # If more to process on the left side and no more to process on the right side,
@@ -78,8 +79,6 @@ class GraphBuilder():
 
         return right_nodes
 
-    #   c       b.4
-    #   b.3     c
     def handle_unmatched(self, ptr_left: int, ptr_right: int, left_nodes: [Node], right, right_nodes: [Node]):
         left_revision_number = left_nodes[ptr_left].revision_number
         right_revision_number = left_revision_number + 1
@@ -151,3 +150,63 @@ class GraphBuilder():
             line_number = line_number + 1
             self.graph.add_node(new_node, node_id=new_node.get_node_id())
         return nodes
+
+    def slice_line(self, revision_number, line_number):
+        starting_node_id = str(revision_number) + "." + str(line_number)
+        starting_node = self.graph.find_node_in_graph(starting_node_id)
+
+        succs_dict_nodes = dict()
+        preds_nodes = []
+
+        succs_dict_nodes[starting_node] = []
+
+        print(starting_node_id)
+        for p in self.graph.predecessors(starting_node):
+            preds_nodes.append(p)
+            self.handle_predecessors(p, preds_nodes)
+        print(preds_nodes)
+        for s in self.graph.successors(starting_node):
+            succs_dict_nodes[starting_node].append(s)
+            succs_dict_nodes[s] = []
+            self.handle_successors(s, succs_dict_nodes)
+        print(succs_dict_nodes)
+
+        self.create_slice_subgraph(preds_nodes, succs_dict_nodes, starting_node)
+
+    def handle_successors(self, succ_node: Node, succs_dict_nodes, ):
+        for s in self.graph.successors(succ_node):
+            succs_dict_nodes[succ_node].append(s)
+            succs_dict_nodes[s] = []
+            self.handle_successors(s, succs_dict_nodes)
+
+    def handle_predecessors(self, pred_node: Node, preds_nodes):
+        for p in self.graph.predecessors(pred_node):
+            preds_nodes.append(p)
+            self.handle_predecessors(p, preds_nodes)
+
+    def create_slice_subgraph(self, preds_nodes, succs_dict_nodes, starting_node: Node):
+        self.sub_graph: Graph = self.graph
+        self.sub_graph.clear()
+        self.sub_graph.add_node(starting_node, starting_node.get_node_id())
+        starting_node_from_graph = self.sub_graph.find_node_in_graph(starting_node.get_node_id())
+
+        # Add nodes and edges for predecessors
+        for i in range(0, len(preds_nodes)):
+            self.sub_graph.add_node(preds_nodes[i], node_id=preds_nodes[i].get_node_id())
+        for j in range(0, len(preds_nodes) - 1):
+            self.sub_graph.add_edge(self.sub_graph.find_node_in_graph(preds_nodes[j].get_node_id()),
+                                    self.sub_graph.find_node_in_graph(preds_nodes[j + 1].get_node_id()))
+            print(self.sub_graph.out_degree(self.sub_graph.find_node_in_graph(preds_nodes[j].get_node_id())))
+        self.sub_graph.add_edge(self.sub_graph.find_node_in_graph(preds_nodes[len(preds_nodes) - 1].get_node_id()),
+                                starting_node_from_graph)
+        print(self.sub_graph.out_degree(self.sub_graph.find_node_in_graph(preds_nodes[len(preds_nodes) - 1].get_node_id())))
+
+        succ_nodes: [Node] = list(succs_dict_nodes.keys())
+        for i in range(1, len(succ_nodes)):
+            self.sub_graph.add_node(succ_nodes[i], node_id=succ_nodes[i].get_node_id())
+        for j in range(0, len(succ_nodes)):
+            curr_node = self.sub_graph.find_node_in_graph(succ_nodes[j].get_node_id())
+            curr_node_succs = succs_dict_nodes[curr_node]
+            for k in range(0, len(curr_node_succs)):
+                self.sub_graph.add_edge(curr_node, self.sub_graph.find_node_in_graph(curr_node_succs[k].get_node_id()))
+            print(str(self.sub_graph.out_degree(curr_node)) + " " + curr_node.get_node_id())
