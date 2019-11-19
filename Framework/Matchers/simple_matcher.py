@@ -9,7 +9,7 @@ class SimpleMatcher:
             return 'u'
 
         #partial match
-        if fuzz.partial_ratio(string_left, string_right) > 90:
+        if fuzz.partial_ratio(string_left, string_right) > 80:
             return 'c'
 
         return 'unmatched'

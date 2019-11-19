@@ -15,6 +15,7 @@ class GraphBuilder():
     def build_graph(self, revisions):
         first_revision = revisions[0]
         starting_nodes = self.initialize_first_revision(first_revision)
+        print(starting_nodes)
         history_graph = [starting_nodes]
         for revision_number in range(1, len(revisions)):
             starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number],
@@ -155,58 +156,70 @@ class GraphBuilder():
         starting_node_id = str(revision_number) + "." + str(line_number)
         starting_node = self.graph.find_node_in_graph(starting_node_id)
 
-        succs_dict_nodes = dict()
-        preds_nodes = []
+        slicing_dict_nodes = dict()
+        slicing_dict_content_by_id = dict()
 
-        succs_dict_nodes[starting_node] = []
+        starting_node_index = starting_node.get_node_id() + "***" + starting_node.content
+        slicing_dict_content_by_id[starting_node_index] = []
+        slicing_dict_nodes[starting_node] = []
 
-        print(starting_node_id)
         for p in self.graph.predecessors(starting_node):
-            preds_nodes.append(p)
-            self.handle_predecessors(p, preds_nodes)
-        print(preds_nodes)
+            slicing_dict_nodes[p] = []
+            slicing_dict_nodes[p].append(starting_node)
+            p_index = p.get_node_id() + "***" + p.content
+            slicing_dict_content_by_id[p_index] = []
+            slicing_dict_content_by_id[p_index].append(starting_node_index)
+            self.handle_predecessors(p, slicing_dict_nodes, slicing_dict_content_by_id)
+
         for s in self.graph.successors(starting_node):
-            succs_dict_nodes[starting_node].append(s)
-            succs_dict_nodes[s] = []
-            self.handle_successors(s, succs_dict_nodes)
-        print(succs_dict_nodes)
+            slicing_dict_nodes[starting_node].append(s)
+            slicing_dict_nodes[s] = []
+            s_index = s.get_node_id() + "***" + s.content
+            slicing_dict_content_by_id[starting_node_index].append(s_index)
+            slicing_dict_content_by_id[s_index] = []
+            self.handle_successors(s, slicing_dict_nodes, slicing_dict_content_by_id)
 
-        self.create_slice_subgraph(preds_nodes, succs_dict_nodes, starting_node)
+        self.create_slice_subgraph(slicing_dict_nodes)
 
-    def handle_successors(self, succ_node: Node, succs_dict_nodes, ):
+        return slicing_dict_nodes, slicing_dict_content_by_id
+
+    def handle_successors(self, succ_node: Node, nodes_dict, content_dict):
         for s in self.graph.successors(succ_node):
-            succs_dict_nodes[succ_node].append(s)
-            succs_dict_nodes[s] = []
-            self.handle_successors(s, succs_dict_nodes)
+            nodes_dict[succ_node].append(s)
+            nodes_dict[s] = []
+            s_index = s.get_node_id() + "***" + s.content
+            content_dict[s_index] = []
+            content_dict[succ_node.get_node_id() + "***" + succ_node.content].append(s_index)
+            self.handle_successors(s, nodes_dict, content_dict)
 
-    def handle_predecessors(self, pred_node: Node, preds_nodes):
+    def handle_predecessors(self, pred_node: Node, nodes_dict, content_dict):
         for p in self.graph.predecessors(pred_node):
-            preds_nodes.append(p)
-            self.handle_predecessors(p, preds_nodes)
+            nodes_dict[p] = []
+            nodes_dict[p].append(pred_node)
+            p_index = p.get_node_id() + "***" + p.content
+            content_dict[p_index] = []
+            content_dict[p_index].append(pred_node.get_node_id() + "***" + pred_node.content)
+            self.handle_predecessors(p, nodes_dict, content_dict)
 
-    def create_slice_subgraph(self, preds_nodes, succs_dict_nodes, starting_node: Node):
+    def create_slice_subgraph(self, slicing_dict_nodes):
         self.sub_graph: Graph = self.graph
         self.sub_graph.clear()
-        self.sub_graph.add_node(starting_node, starting_node.get_node_id())
-        starting_node_from_graph = self.sub_graph.find_node_in_graph(starting_node.get_node_id())
 
-        # Add nodes and edges for predecessors
-        for i in range(0, len(preds_nodes)):
-            self.sub_graph.add_node(preds_nodes[i], node_id=preds_nodes[i].get_node_id())
-        for j in range(0, len(preds_nodes) - 1):
-            self.sub_graph.add_edge(self.sub_graph.find_node_in_graph(preds_nodes[j].get_node_id()),
-                                    self.sub_graph.find_node_in_graph(preds_nodes[j + 1].get_node_id()))
-            print(self.sub_graph.out_degree(self.sub_graph.find_node_in_graph(preds_nodes[j].get_node_id())))
-        self.sub_graph.add_edge(self.sub_graph.find_node_in_graph(preds_nodes[len(preds_nodes) - 1].get_node_id()),
-                                starting_node_from_graph)
-        print(self.sub_graph.out_degree(self.sub_graph.find_node_in_graph(preds_nodes[len(preds_nodes) - 1].get_node_id())))
+        nodes = list(slicing_dict_nodes.keys())
 
-        succ_nodes: [Node] = list(succs_dict_nodes.keys())
-        for i in range(1, len(succ_nodes)):
-            self.sub_graph.add_node(succ_nodes[i], node_id=succ_nodes[i].get_node_id())
-        for j in range(0, len(succ_nodes)):
-            curr_node = self.sub_graph.find_node_in_graph(succ_nodes[j].get_node_id())
-            curr_node_succs = succs_dict_nodes[curr_node]
-            for k in range(0, len(curr_node_succs)):
-                self.sub_graph.add_edge(curr_node, self.sub_graph.find_node_in_graph(curr_node_succs[k].get_node_id()))
-            print(str(self.sub_graph.out_degree(curr_node)) + " " + curr_node.get_node_id())
+        for n in nodes:
+            self.sub_graph.add_node(n, node_id=n.get_node_id())
+
+        for n in nodes:
+            nodes_succs = slicing_dict_nodes[n]
+            curr_node = self.sub_graph.find_node_in_graph(n.get_node_id())
+
+            for s in nodes_succs:
+                succ_node = self.sub_graph.find_node_in_graph(s.get_node_id())
+                self.sub_graph.add_edge(curr_node, succ_node)
+
+        # pos = nx.spring_layout(self.sub_graph)
+        # nx.draw_networkx_nodes(self.sub_graph, pos, node_size=500)
+        # nx.draw_networkx_labels(self.sub_graph, pos)
+        # nx.draw_networkx_edges(self.sub_graph, pos, edge_color='r', arrows=True)
+        # plt.show()
