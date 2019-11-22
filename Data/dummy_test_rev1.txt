@@ -1,0 +1,8 @@
+void count_to_100()
+{
+    int j;
+    for (j = 0; j <= 100; j++)
+    {
+        System.println(j);
+    }
+}
