@@ -14,3 +14,6 @@ class Node:
 
     def get_node_id(self):
         return str(self.revision_number) + "." + str(self.line_number)
+
+    def __lt__(self, other):
+        return float(self.get_node_id()) < float(other.get_node_id())

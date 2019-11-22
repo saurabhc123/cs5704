@@ -25,11 +25,9 @@ class NetworkxGraph(Graph):
         return None
 
     def predecessors(self, node: Node):
-        # return nx.ancestors(self.G, node)
         return self.G.predecessors(node)
 
     def successors(self, node: Node):
-        # return nx.descendants(self.G, node)
         return self.G.successors(node)
 
     def clear(self):

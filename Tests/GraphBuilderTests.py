@@ -2,6 +2,7 @@ import networkx as nx
 import Framework.graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
 from Implementations.Graphs.networkx_graph import NetworkxGraph
+from Implementations.Slicer.line_slicing import LineSlicing
 
 rev1 = [
     "a",
@@ -57,10 +58,11 @@ def large_test():
     revisions = [rev1, rev2, rev3, rev4, rev5]
     networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    slicer = LineSlicing(networkx_graph)
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph, slicer)
     beginning = gb_obj.build_graph(revisions)
     print(beginning[1][1].content)
-    slicing_dict, slicing_dict_content = gb_obj.slice_line(2, 2)
+    slicing_dict, slicing_dict_content = gb_obj.slice(2, 2)
     print(slicing_dict)
     print(slicing_dict_content)
 
@@ -231,8 +233,8 @@ def test_multiple_files():
 # test_mutation_of_lines()
 # test_right_addition()
 # test_blanks()
-# large_test()
-test_multiple_files()
+large_test()
+# test_multiple_files()
 
 
 
