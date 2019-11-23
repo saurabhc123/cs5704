@@ -1,7 +1,10 @@
 import networkx as nx
 import Framework.graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
+from Framework.orchestrator import Orchestrator
 from Implementations.Graphs.networkx_graph import NetworkxGraph
+from Implementations.InputSources.stubbed_input_source import StubbedInputSource
+from Implementations.Mappers.simple_mapper import SimpleMapper
 from Implementations.Serializers.csv_file_serializer import CsvFileSerializer
 from Implementations.Serializers.in_memory_serializer import InMemorySerializer
 
@@ -201,32 +204,16 @@ def test_with_actual_files():
     j = 0
 
 def test_serialization():
-    rev1 = [
-        "a",
-        "b",
-        "c",
-        "d",
-        "e",
-        "fd",
-        "z"
-    ]
-
-    rev2 = [
-        "a",
-        "x",
-        "c",
-        "e",
-        "y",
-        "z.1"
-    ]
-    beginning = None
-    revisions = [rev1, rev2]
-    in_memory_serializer = InMemorySerializer()
-    networkx_graph = NetworkxGraph(in_memory_serializer)
-    simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
-    beginning = gb_obj.build_graph(revisions)
-    gb_obj.graph.serialize_graph()
+    input_source = StubbedInputSource()
+    mapper = SimpleMapper()
+    orchestrator = Orchestrator(input_source, mapper)
+    orchestrator.orchestrate()
+    # in_memory_serializer = InMemorySerializer()
+    # networkx_graph = NetworkxGraph(in_memory_serializer)
+    # simple_matcher = SimpleMatcher()
+    # gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    # beginning = gb_obj.build_graph(revisions)
+    # gb_obj.graph.serialize_graph()
     # assert beginning[0][1].label == "a"
 
 # test_with_actual_files()
