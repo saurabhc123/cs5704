@@ -1,15 +1,19 @@
 import networkx as nx
 
+from Framework.Matchers.deserialization_matcher import DeserializationMatcher
 from Framework.graph import Graph
+from Framework.graph_builder import GraphBuilder
 from Framework.node import Node
 from Framework.serializer import Serializer
 
 
 class NetworkxGraph(Graph):
 
-    def __init__(self, serializer: Serializer = None):
+    def __init__(self, serializer: Serializer = None, revisions = None):
         self.G = nx.MultiDiGraph()
         self.serializer = serializer
+        self.revisions = revisions
+        self.edge_tuples = []
 
     def add_node(self, node: Node, node_id: str):
         self.G.add_node(node, id=node_id)
@@ -34,5 +38,12 @@ class NetworkxGraph(Graph):
             right_node = edge[1]
             label = right_node.label
             edge_tuples.append((left_node, right_node, label))
-
+        self.edge_tuples = edge_tuples
         self.serializer.serialize(edge_tuples)
+
+    def deserialize(self, edge_tuples):
+        deserialization_matcher = DeserializationMatcher(edge_tuples)
+        graph_builder = GraphBuilder(deserialization_matcher)
+        graph_builder.build_graph(self.revisions)
+        return self.G
+

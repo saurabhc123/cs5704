@@ -1,3 +1,4 @@
+from Framework.Matchers.deserialization_matcher import DeserializationMatcher
 from Framework.serializer import Serializer
 
 
@@ -24,10 +25,12 @@ class InMemorySerializer(Serializer):
             self.write_edge(edge_list[i][0].line_number, edge_list[i][2], edge_list[i][1].line_number)
 
     def deserialize(self, output_data_bag):
+        matcher = DeserializationMatcher(self.edges)
+
         pass
 
     def write_header(self, left_revision_string, right_revision_string):
-        self.edges.append("{},{}".format(left_revision_string, right_revision_string))
+        self.edges.append(((left_revision_string, right_revision_string)))
 
     def write_edge(self, left_line_number, label, right_line_number):
-        self.edges.append("{},{},{}".format(left_line_number, label, right_line_number))
+        self.edges.append((left_line_number, label, right_line_number))

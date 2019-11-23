@@ -50,7 +50,8 @@ class GraphBuilder():
                 break
 
             left_node = left_nodes[ptr_left]
-            if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'u':
+            match_status = self.get_match_status(left_node, ptr_right, right)
+            if match_status == 'u':
                 new_right_node = Node("u", ptr_right + 1, right[ptr_right], revision_number + 1)
                 self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
                 self.graph.add_edge(left_node, new_right_node)
@@ -59,7 +60,7 @@ class GraphBuilder():
                 ptr_right = ptr_right + 1
                 continue
 
-            if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'c':
+            if match_status == 'c':
                 new_right_node = Node("c", ptr_right + 1, right[ptr_right], revision_number + 1)
                 self.graph.add_node(new_right_node, node_id=new_right_node.get_node_id())
                 self.graph.add_edge(left_node, new_right_node)
@@ -95,7 +96,7 @@ class GraphBuilder():
             return ptr_left, ptr_right
         # Compare left_ptr and right
         left_node = left_nodes[ptr_left]
-        match_status = self.matcher.evaluate_match(left_node.content, right[ptr_right])
+        match_status = self.get_match_status(left_node, ptr_right, right)
         if "unmatched" in match_status:
             # Unmatched
             # Create right node as "a" and add to the graph
@@ -123,6 +124,9 @@ class GraphBuilder():
             ptr_right = ptr_right + 1
             ptr_left = ptr_left + 1
             return ptr_left, ptr_right
+
+    def get_match_status(self, left_node, ptr_right, right):
+        return self.matcher.evaluate_match(left_node, ptr_right, right)
 
     def get_node_from_graph(self, left_nodes, ptr_left):
         node_id_to_search = left_nodes[ptr_left].get_node_id()

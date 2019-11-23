@@ -227,14 +227,20 @@ def test_serialization():
     gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     beginning = gb_obj.build_graph(revisions)
     gb_obj.graph.serialize_graph()
+    edge_tuples = networkx_graph.serializer.edges
+    deserialized_networkx_graph = NetworkxGraph(in_memory_serializer, revisions = revisions)
+    serialized_gb_obj = deserialized_networkx_graph.deserialize(edge_tuples)
+
+
     # assert beginning[0][1].label == "a"
 
-# test_with_actual_files()
-# test_check_displacement()
-# test_mutation_of_lines()
 test_serialization()
-# test_right_addition()
-# test_blanks()
+
+test_with_actual_files()
+test_check_displacement()
+test_mutation_of_lines()
+test_right_addition()
+#test_blanks()
 
 
 
