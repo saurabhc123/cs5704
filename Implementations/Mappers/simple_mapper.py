@@ -50,23 +50,23 @@ class SimpleMapper(Mapper):
             left_node = left_nodes[ptr_left]
             match_result = self.matcher.evaluate_match(left_node.content, right[ptr_right])
             if match_result == 'u':
-                if ptr_left not in current_revision_mappings:
-                    current_revision_mappings[ptr_left] = {}
-                current_revision_mappings[ptr_left][ptr_right] = match_result
+                if ptr_left + 1 not in current_revision_mappings:
+                    current_revision_mappings[ptr_left + 1] = {}
+                current_revision_mappings[ptr_left + 1][ptr_right + 1] = match_result
                 ptr_left = ptr_left + 1
                 ptr_right = ptr_right + 1
                 continue
 
             match_result = self.matcher.evaluate_match(left_node.content, right[ptr_right])
             if match_result == 'c':
-                if ptr_left not in current_revision_mappings:
-                    current_revision_mappings[ptr_left] = {}
-                current_revision_mappings[ptr_left][ptr_right] = match_result
+                if ptr_left + 1 not in current_revision_mappings:
+                    current_revision_mappings[ptr_left + 1] = {}
+                current_revision_mappings[ptr_left + 1][ptr_right + 1] = match_result
                 ptr_right = ptr_right + 1
                 continue
 
                 # Unmatched
-            if ptr_left in current_revision_mappings:
+            if ptr_left + 1 in current_revision_mappings:
                 ptr_left = ptr_left + 1
                 continue
 
@@ -93,9 +93,9 @@ class SimpleMapper(Mapper):
             ptr_left = ptr_left - 1
             return ptr_left, ptr_right
         else:
-            if ptr_left not in current_revision_mappings:
-                current_revision_mappings[ptr_left] = {}
-            current_revision_mappings[ptr_left][ptr_right] = match_result
+            if ptr_left + 1 not in current_revision_mappings:
+                current_revision_mappings[ptr_left + 1] = {}
+            current_revision_mappings[ptr_left + 1][ptr_right + 1] = match_result
             # Increment left_ptr and right_ptr by 1
             ptr_right = ptr_right + 1
             ptr_left = ptr_left + 1

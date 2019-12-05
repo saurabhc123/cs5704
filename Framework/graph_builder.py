@@ -131,6 +131,7 @@ class GraphBuilder():
     def initialize_first_revision(self, first_revision):
         nodes = []
         line_number = 1
+        # noinspection PyPackageRequirements
         for line_content in first_revision:
             new_node = Node('a', line_number, line_content, 1)
             nodes.append(new_node)
