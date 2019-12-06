@@ -20,11 +20,11 @@ class SimpleMapper(Mapper):
 
     def get_mapping(self, left_line_number: int, right_line_number: int, left_revision_number):
         if self.mappings[left_revision_number - 1] is not None:
-            if self.mappings[left_revision_number - 1][left_line_number] is not None:
-                if self.mappings[left_revision_number - 1][left_line_number][right_line_number] is not None:
+            if left_line_number in self.mappings[left_revision_number - 1]:
+                if right_line_number in self.mappings[left_revision_number - 1][left_line_number]:
                     return self.mappings[left_revision_number - 1][left_line_number][right_line_number]
 
-        return None
+        return "unmatched"
 
     def build_graph(self, revisions):
         first_revision = revisions[0]
@@ -45,6 +45,17 @@ class SimpleMapper(Mapper):
         while True:
             # if no more to process on the right side and the left side
             if ptr_left >= len(left_nodes) and ptr_right >= len(right):
+                break
+
+            # if no more to process on the left side, but more on the right side
+            # Iterate through the right nodes, and add all of them (added) as the right nodes array and the graph
+            if ptr_left >= len(left_nodes) and ptr_right < len(right):
+                break
+
+            # If more to process on the left side and no more to process on the right side,
+            # Iterate through the left nodes, and mark all of them as (deleted) the left nodes array.
+            # Find the left node on the graph. Change its label.
+            if ptr_left < len(left_nodes) and ptr_right >= len(right):
                 break
 
             left_node = left_nodes[ptr_left]

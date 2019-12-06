@@ -1,9 +1,8 @@
-from Framework.Matchers.simple_matcher import SimpleMatcher
 from Framework.input_source import InputSource
 from Framework.mapper import Mapper
 from Implementations.Graphs.networkx_graph import NetworkxGraph
 from Implementations.Serializers.in_memory_serializer import InMemorySerializer
-import Framework.graph_builder as gb
+import Implementations.GraphBuilder.simple_graph_builder as gb
 
 
 class Orchestrator:
@@ -21,10 +20,9 @@ class Orchestrator:
 
         # Initialize Mappings
         self.mapper.initialize_mappings(file_revisions)
-
-        # in_memory_serializer = InMemorySerializer()
-        # networkx_graph = NetworkxGraph(in_memory_serializer)
-        # simple_matcher = SimpleMatcher()
-        # gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
-        # beginning = gb_obj.build_graph(revisions)
-        # gb_obj.graph.serialize_graph()
+        in_memory_serializer = InMemorySerializer()
+        networkx_graph = NetworkxGraph(in_memory_serializer)
+        gb_obj = gb.SimpleGraphBuilder(self.mapper, networkx_graph)
+        beginning = gb_obj.build_graph(file_revisions)
+        gb_obj.graph.serialize_graph()
+        return beginning
