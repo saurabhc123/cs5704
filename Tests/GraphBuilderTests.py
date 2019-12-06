@@ -8,20 +8,19 @@ from Implementations.Serializers.in_memory_serializer import InMemorySerializer
 
 rev1 = [
     "a",
+    "b",
+    "c",
+]
+
+rev2 = [
+    "a",
     "b.1",
     "b.2",
     "c",
     "b.3"
 ]
 
-# rev2 = [
-#     "a",
-#     "b.1",
-#     "b.2",
-#     "e.1"
-# ]
-
-rev2 = [
+rev3 = [
     "a",
     "b.1",
     "b.2",
@@ -29,7 +28,7 @@ rev2 = [
     "c"
 ]
 
-rev3 = [
+rev4 = [
     "a.1",
     "b.1",
     "b.2",
@@ -39,8 +38,9 @@ rev3 = [
     "e.2"
 ]
 
-rev4 = [
-    "b.1",
+rev5 = [
+    "b.1.1",
+    "b.1.2",
     "b.2",
     "d",
     "e.2"
@@ -54,6 +54,19 @@ rev4 = [
 #     beginning = gb_obj.build_graph(revisions)
 #
 # main()
+
+
+def large_test():
+    revisions = [rev1, rev2, rev3, rev4, rev5]
+    networkx_graph = NetworkxGraph()
+    simple_matcher = SimpleMatcher()
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    beginning = gb_obj.build_graph(revisions)
+    print(beginning[1][1].content)
+    slicing_dict, slicing_dict_content = gb_obj.slice_line(2, 2)
+    print(slicing_dict)
+    print(slicing_dict_content)
+
 
 def test_check_displacement():
     rev1 = [
@@ -79,10 +92,6 @@ def test_check_displacement():
     networkx_graph = NetworkxGraph(in_memory_serializer)
     orchestrator = Orchestrator(input_source, mapper, networkx_graph)
     beginning = orchestrator.orchestrate()
-    # networkx_graph = NetworkxGraph()
-    # simple_matcher = SimpleMatcher()
-    # gb_obj = gb.OldGraphBuilder(simple_matcher, networkx_graph)
-    # beginning = gb_obj.build_graph(revisions)
 
     assert beginning[1][3].label == "u"
     assert beginning[1][4].label == "a"
@@ -212,6 +221,20 @@ def test_with_actual_files():
     orchestrator = Orchestrator(input_source, mapper, networkx_graph)
     beginning = orchestrator.orchestrate()
 
+
+def test_multiple_files():
+    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
+    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
+    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
+    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
+    revisions = [rev1, rev2, rev3, rev4]
+    networkx_graph = NetworkxGraph()
+    simple_matcher = SimpleMatcher()
+    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    beginning = gb_obj.build_graph(revisions)
+    print(beginning[2][4].label)
+    nodes, content = gb_obj.slice_line(3, 5)
+    print(content)
 
 def test_serialization():
     rev1 = [

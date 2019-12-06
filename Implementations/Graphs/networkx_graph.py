@@ -11,8 +11,9 @@ class NetworkxGraph(Graph):
         self.G = nx.MultiDiGraph()
         self.serializer = serializer
 
+
     def add_node(self, node: Node, node_id: str):
-        self.G.add_node(node, id=node_id)
+        self.G.add_node(node, node_id=node_id)
 
     def add_edge(self, left_node: Node, new_right_node: Node):
         self.G.add_edge(left_node, new_right_node)
@@ -22,7 +23,7 @@ class NetworkxGraph(Graph):
 
     def find_node_in_graph(self, node_id):
         for (key, value) in self.G.nodes(data=True):
-            if value['id'] == node_id:
+            if value['node_id'] == node_id:
                 return key
         return None
 
@@ -36,3 +37,15 @@ class NetworkxGraph(Graph):
             edge_tuples.append((left_node, right_node, label))
 
         self.serializer.serialize(edge_tuples)
+
+    def predecessors(self, node: Node):
+        # return nx.ancestors(self.G, node)
+        return self.G.predecessors(node)
+
+    def successors(self, node: Node):
+        # return nx.descendants(self.G, node)
+        return self.G.successors(node)
+
+    def clear(self):
+        self.G.clear()
+

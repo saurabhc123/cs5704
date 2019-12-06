@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-
 from Framework.node import Node
 
 
@@ -18,4 +17,13 @@ class Graph(ABC):
         pass
 
     def serialize_graph(self):
+        pass
+
+    def predecessors(self, node: Node):
+        pass
+
+    def successors(self, node: Node):
+        pass
+
+    def clear(self):
         pass
