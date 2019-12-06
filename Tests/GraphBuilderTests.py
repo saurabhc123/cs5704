@@ -2,7 +2,7 @@ import Implementations.GraphBuilder.old_graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
 from Framework.orchestrator import Orchestrator
 from Implementations.Graphs.networkx_graph import NetworkxGraph
-from Implementations.Slicer.line_slicing import LineSlicing
+from Implementations.Slicer.line_slicer import LineSlicer
 from Implementations.InputSources.stubbed_input_source import StubbedInputSource
 from Implementations.Mappers.simple_mapper import SimpleMapper
 from Implementations.Serializers.in_memory_serializer import InMemorySerializer
@@ -61,7 +61,7 @@ def large_test():
     revisions = [rev1, rev2, rev3, rev4, rev5]
     networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    slicer = LineSlicing(networkx_graph)
+    slicer = LineSlicer(networkx_graph)
     gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph, slicer)
     beginning = gb_obj.build_graph(revisions)
     print(beginning[1][1].content)
@@ -230,13 +230,20 @@ def test_multiple_files():
     rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
     rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
     revisions = [rev1, rev2, rev3, rev4]
-    networkx_graph = NetworkxGraph()
-    simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
-    beginning = gb_obj.build_graph(revisions)
+    # networkx_graph = NetworkxGraph()
+    # simple_matcher = SimpleMatcher()
+    # gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    # beginning = gb_obj.build_graph(revisions)
+
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    beginning = orchestrator.orchestrate()
     print(beginning[2][4].label)
-    nodes, content = gb_obj.slice_line(3, 5)
-    print(content)
+    # nodes, content = gb_obj.slice_line(3, 5)
+    # print(content)
 
 def test_serialization():
     rev1 = [
@@ -275,8 +282,8 @@ test_mutation_of_lines()
 test_serialization()
 test_right_addition()
 # test_blanks()
-large_test()
-# test_multiple_files()
+# large_test()
+test_multiple_files()
 
 
 

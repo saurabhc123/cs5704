@@ -4,7 +4,7 @@ from Framework.graph import Graph
 from Framework.node import Node
 
 
-class LineSlicing(Slicer):
+class LineSlicer(Slicer):
 
     def __init__(self, graph: Graph):
         self.G = graph
