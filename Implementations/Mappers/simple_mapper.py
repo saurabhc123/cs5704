@@ -48,13 +48,10 @@ class SimpleMapper(Mapper):
                 break
 
             # if no more to process on the left side, but more on the right side
-            # Iterate through the right nodes, and add all of them (added) as the right nodes array and the graph
             if ptr_left >= len(left_nodes) and ptr_right < len(right):
                 break
 
             # If more to process on the left side and no more to process on the right side,
-            # Iterate through the left nodes, and mark all of them as (deleted) the left nodes array.
-            # Find the left node on the graph. Change its label.
             if ptr_left < len(left_nodes) and ptr_right >= len(right):
                 break
 

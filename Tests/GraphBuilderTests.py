@@ -4,6 +4,7 @@ from Framework.orchestrator import Orchestrator
 from Implementations.Graphs.networkx_graph import NetworkxGraph
 from Implementations.InputSources.stubbed_input_source import StubbedInputSource
 from Implementations.Mappers.simple_mapper import SimpleMapper
+from Implementations.Serializers.in_memory_serializer import InMemorySerializer
 
 rev1 = [
     "a",
@@ -74,7 +75,9 @@ def test_check_displacement():
     revisions = [rev1, rev2]
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
-    orchestrator = Orchestrator(input_source, mapper)
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
     beginning = orchestrator.orchestrate()
     # networkx_graph = NetworkxGraph()
     # simple_matcher = SimpleMatcher()
@@ -105,7 +108,9 @@ def test_mutation_of_lines():
     revisions = [rev1, rev2]
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
-    orchestrator = Orchestrator(input_source, mapper)
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
     beginning = orchestrator.orchestrate()
 
     assert beginning[1][0].label == "u"
@@ -145,7 +150,9 @@ def test_right_addition():
     revisions = [rev1, rev2]
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
-    orchestrator = Orchestrator(input_source, mapper)
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
     beginning = orchestrator.orchestrate()
 
     assert beginning[0][2].label == "a"
@@ -200,7 +207,9 @@ def test_with_actual_files():
     revisions = [rev1, rev2]
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
-    orchestrator = Orchestrator(input_source, mapper)
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
     beginning = orchestrator.orchestrate()
 
 
@@ -226,7 +235,9 @@ def test_serialization():
     revisions = [rev1, rev2]
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
-    orchestrator = Orchestrator(input_source, mapper)
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
     beginning = orchestrator.orchestrate()
     assert beginning[1][0].label == "u"
     assert beginning[1][2].label == "u"

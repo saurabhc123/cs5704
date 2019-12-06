@@ -1,3 +1,5 @@
+from Framework.graph import Graph
+from Framework.graph_builder import GraphBuilder
 from Framework.input_source import InputSource
 from Framework.mapper import Mapper
 from Implementations.Graphs.networkx_graph import NetworkxGraph
@@ -9,9 +11,11 @@ class Orchestrator:
 
     def __init__(self,
                  input_source: InputSource,
-                 mapper: Mapper):
+                 mapper: Mapper,
+                 graph: Graph):
         self.input_source = input_source
         self.mapper = mapper
+        self.graph = graph
 
     def orchestrate(self):
 
@@ -20,9 +24,7 @@ class Orchestrator:
 
         # Initialize Mappings
         self.mapper.initialize_mappings(file_revisions)
-        in_memory_serializer = InMemorySerializer()
-        networkx_graph = NetworkxGraph(in_memory_serializer)
-        gb_obj = gb.SimpleGraphBuilder(self.mapper, networkx_graph)
+        gb_obj = gb.SimpleGraphBuilder(self.mapper, self.graph)
         beginning = gb_obj.build_graph(file_revisions)
         gb_obj.graph.serialize_graph()
         return beginning
