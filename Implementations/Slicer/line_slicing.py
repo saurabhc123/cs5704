@@ -9,6 +9,8 @@ class LineSlicing(Slicer):
     def __init__(self, graph: Graph):
         self.G = graph
 
+
+    # criterion should be starting_line, ending_line, staring_rev, ending_rev
     def slice_line(self, revision_number: int, line_number: int):
         starting_node_id = str(revision_number) + "." + str(line_number)
         starting_node = self.G.find_node_in_graph(starting_node_id)
