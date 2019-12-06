@@ -1,5 +1,4 @@
-import networkx as nx
-import Framework.graph_builder as gb
+import Implementations.GraphBuilder.simple_graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
 from Implementations.Graphs.networkx_graph import NetworkxGraph
 
@@ -65,7 +64,7 @@ def test_check_displacement():
     revisions = [rev1, rev2]
     networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    gb_obj = gb.SimpleGraphBuilder(simple_matcher)
     beginning = gb_obj.build_graph(revisions)
 
     assert beginning[1][3].label == "u"
@@ -135,7 +134,7 @@ def test_right_addition():
     revisions = [rev1, rev2]
     networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
+    gb_obj = gb.SimpleGraphBuilder(simple_matcher)
     beginning = gb_obj.build_graph(revisions)
 
     assert beginning[0][2].label == "a"

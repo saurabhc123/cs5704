@@ -2,12 +2,15 @@ import networkx as nx
 
 from Framework.graph import Graph
 from Framework.node import Node
+from Framework.serializer import Serializer
 
 
 class NetworkxGraph(Graph):
 
-    def __init__(self):
+    def __init__(self, serializer: Serializer = None):
         self.G = nx.MultiDiGraph()
+        self.serializer = serializer
+
 
     def add_node(self, node: Node, node_id: str):
         self.G.add_node(node, node_id=node_id)
@@ -24,6 +27,17 @@ class NetworkxGraph(Graph):
                 return key
         return None
 
+    def serialize_graph(self):
+        graph_edges = list(self.G.edges)
+        edge_tuples = []
+        for edge in graph_edges:
+            left_node = edge[0]
+            right_node = edge[1]
+            label = right_node.label
+            edge_tuples.append((left_node, right_node, label))
+
+        self.serializer.serialize(edge_tuples)
+
     def predecessors(self, node: Node):
         return self.G.predecessors(node)
 
@@ -32,3 +46,4 @@ class NetworkxGraph(Graph):
 
     def clear(self):
         self.G.clear()
+

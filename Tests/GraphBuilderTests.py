@@ -1,8 +1,11 @@
-import networkx as nx
-import Framework.graph_builder as gb
+import Implementations.GraphBuilder.old_graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
+from Framework.orchestrator import Orchestrator
 from Implementations.Graphs.networkx_graph import NetworkxGraph
 from Implementations.Slicer.line_slicing import LineSlicing
+from Implementations.InputSources.stubbed_input_source import StubbedInputSource
+from Implementations.Mappers.simple_mapper import SimpleMapper
+from Implementations.Serializers.in_memory_serializer import InMemorySerializer
 
 rev1 = [
     "a",
@@ -85,11 +88,12 @@ def test_check_displacement():
     ]
 
     revisions = [rev1, rev2]
-    networkx_graph = NetworkxGraph()
-    simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
-    beginning = gb_obj.build_graph(revisions)
-    gb_obj.slice_line(2, 1)
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    beginning = orchestrator.orchestrate()
 
     assert beginning[1][3].label == "u"
     assert beginning[1][4].label == "a"
@@ -113,10 +117,12 @@ def test_mutation_of_lines():
     ]
     beginning = None
     revisions = [rev1, rev2]
-    networkx_graph = NetworkxGraph()
-    simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
-    beginning = gb_obj.build_graph(revisions)
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    beginning = orchestrator.orchestrate()
 
     assert beginning[1][0].label == "u"
     assert beginning[1][1].label == "c"
@@ -153,10 +159,12 @@ def test_right_addition():
     ]
     beginning = None
     revisions = [rev1, rev2]
-    networkx_graph = NetworkxGraph()
-    simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
-    beginning = gb_obj.build_graph(revisions)
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    beginning = orchestrator.orchestrate()
 
     assert beginning[0][2].label == "a"
     assert beginning[1][2].label == "a"
@@ -184,10 +192,10 @@ def test_blanks():
     ]
     beginning = None
     revisions = [rev1, rev2]
-    networkx_graph = NetworkxGraph()
-    simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
-    beginning = gb_obj.build_graph(revisions)
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    orchestrator = Orchestrator(input_source, mapper)
+    beginning = orchestrator.orchestrate()
 
     assert beginning[0][1].label == "a"
     assert beginning[0][2].label == "a"
@@ -205,19 +213,22 @@ def ReadTextFromFile(file_name):
     return f.read().split('\n')
 
 def test_with_actual_files():
-    rev1 = ReadTextFromFile("../Data/Rev1")
-    rev2 = ReadTextFromFile("../Data/Rev2")
+    rev1 = ReadTextFromFile("Data/Rev1")
+    rev2 = ReadTextFromFile("Data/Rev2")
     revisions = [rev1, rev2]
-    networkx_graph = NetworkxGraph()
-    simple_matcher = SimpleMatcher()
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
-    beginning = gb_obj.build_graph(revisions)
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    beginning = orchestrator.orchestrate()
+
 
 def test_multiple_files():
-    rev1 = ReadTextFromFile("../Data/dummy_test_rev1.txt")
-    rev2 = ReadTextFromFile("../Data/dummy_test_rev2.txt")
-    rev3 = ReadTextFromFile("../Data/dummy_test_rev3.txt")
-    rev4 = ReadTextFromFile("../Data/dummy_test_rev4.txt")
+    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
+    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
+    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
+    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
     revisions = [rev1, rev2, rev3, rev4]
     networkx_graph = NetworkxGraph()
     simple_matcher = SimpleMatcher()
@@ -227,11 +238,42 @@ def test_multiple_files():
     nodes, content = gb_obj.slice_line(3, 5)
     print(content)
 
+def test_serialization():
+    rev1 = [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "fd",
+        "z"
+    ]
 
-# test_with_actual_files()
-# test_check_displacement()
-# test_mutation_of_lines()
-# test_right_addition()
+    rev2 = [
+        "a",
+        "x",
+        "c",
+        "e",
+        "y",
+        "z.1"
+    ]
+    revisions = [rev1, rev2]
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    beginning = orchestrator.orchestrate()
+    assert beginning[1][0].label == "u"
+    assert beginning[1][2].label == "u"
+    assert beginning[1][3].label == "u"
+    assert beginning[1][5].label == "c"
+
+test_with_actual_files()
+test_check_displacement()
+test_mutation_of_lines()
+test_serialization()
+test_right_addition()
 # test_blanks()
 large_test()
 # test_multiple_files()

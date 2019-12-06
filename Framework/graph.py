@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-
 from Framework.node import Node
 
 
@@ -15,6 +14,9 @@ class Graph(ABC):
         pass
 
     def find_node_in_graph(self, node_id):
+        pass
+
+    def serialize_graph(self):
         pass
 
     def predecessors(self, node: Node):
