@@ -2,6 +2,7 @@ import Implementations.GraphBuilder.old_graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
 from Framework.orchestrator import Orchestrator
 from Implementations.Graphs.networkx_graph import NetworkxGraph
+from Implementations.Serializers.csv_file_serializer import CsvFileSerializer
 from Implementations.Slicer.line_slicer import LineSlicer
 from Implementations.InputSources.stubbed_input_source import StubbedInputSource
 from Implementations.Mappers.simple_mapper import SimpleMapper
@@ -282,6 +283,40 @@ def test_serialization():
     assert beginning[1][3].label == "u"
     assert beginning[1][5].label == "c"
 
+
+def test_deserialization():
+    rev1 = [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "fd",
+        "z"
+    ]
+
+    rev2 = [
+        "a",
+        "x",
+        "c",
+        "e",
+        "y",
+        "z.1"
+    ]
+    revisions = [rev1, rev2]
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    csv_serializer = CsvFileSerializer("Data", "deserizalized.csv")
+    networkx_graph = NetworkxGraph(csv_serializer)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    beginning = orchestrator.orchestrate()
+    assert beginning[1][0].label == "u"
+    assert beginning[1][2].label == "u"
+    assert beginning[1][3].label == "u"
+    assert beginning[1][5].label == "c"
+
+test_deserialization()
 test_with_actual_files()
 test_check_displacement()
 test_mutation_of_lines()

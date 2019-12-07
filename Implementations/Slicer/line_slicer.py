@@ -79,9 +79,7 @@ class LineSlicer(Slicer):
 
     def slice(self, revision_number, line_number):
         nodes, content_id = self.slice_line(revision_number, line_number)
-
         self.visualize_subgraph(nodes)
-
         return nodes, content_id
 
     def visualize_subgraph(self, nodes_dict:dict):
