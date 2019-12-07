@@ -227,8 +227,8 @@ def ReadTextFromFile(file_name):
     return f.read().split('\n')
 
 def test_with_actual_files():
-    rev1 = ReadTextFromFile("../Data/Rev1")
-    rev2 = ReadTextFromFile("../Data/Rev2")
+    rev1 = ReadTextFromFile("Data/Rev1")
+    rev2 = ReadTextFromFile("Data/Rev2")
     revisions = [rev1, rev2]
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
@@ -240,10 +240,10 @@ def test_with_actual_files():
 
 
 def test_multiple_files():
-    rev1 = ReadTextFromFile("../Data/dummy_test_rev1.txt")
-    rev2 = ReadTextFromFile("../Data/dummy_test_rev2.txt")
-    rev3 = ReadTextFromFile("../Data/dummy_test_rev3.txt")
-    rev4 = ReadTextFromFile("../Data/dummy_test_rev4.txt")
+    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
+    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
+    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
+    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
     revisions = [rev1, rev2, rev3, rev4]
     # networkx_graph = NetworkxGraph()
     # simple_matcher = SimpleMatcher()
