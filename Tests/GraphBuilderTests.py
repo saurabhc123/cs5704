@@ -8,6 +8,8 @@ from Implementations.InputSources.stubbed_input_source import StubbedInputSource
 from Implementations.Mappers.simple_mapper import SimpleMapper
 from Implementations.Serializers.in_memory_serializer import InMemorySerializer
 import os
+import git
+from git import Repo
 
 rev1 = [
     "a",
@@ -416,15 +418,41 @@ def test_graph_building_via_deserialization():
     assert mapper.get_mapping(3, 7, 3) == mappings[2][3][7]
     assert mapper.get_mapping(4, 8, 3) == mappings[2][4][8]
 
-test_graph_building_via_deserialization()
-test_multiple_file_csv_deserialization()
-test_multiple_file_deserialization()
-test_deserialization()
-test_with_actual_files()
-test_check_displacement()
-test_mutation_of_lines()
-test_serialization()
-test_right_addition()
-test_blanks()
-large_test()
-test_multiple_files()
+def test_git_files_as_input():
+
+    bare_repo = Repo("./cs5704")
+    assert bare_repo
+    path = "Framework/orchestrator.py"
+    relevant_commits = list(bare_repo.iter_commits(paths=path))
+    #commit = bare_repo.commit('master')
+
+
+
+    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
+    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
+    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
+    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
+    revisions = [rev1, rev2, rev3, rev4]
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    # csv_serializer = CsvFileSerializer("Data", "multi_line.csv")
+    # networkx_graph = NetworkxGraph(csv_serializer)
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    beginning = orchestrator.orchestrate()
+
+test_git_files_as_input()
+# test_graph_building_via_deserialization()
+# test_multiple_file_csv_deserialization()
+# test_multiple_file_deserialization()
+# test_deserialization()
+# test_with_actual_files()
+# test_check_displacement()
+# test_mutation_of_lines()
+# test_serialization()
+# test_right_addition()
+# test_blanks()
+# large_test()
+# test_multiple_files()
