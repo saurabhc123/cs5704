@@ -7,6 +7,7 @@ from Implementations.Slicer.line_slicer import LineSlicer
 from Implementations.InputSources.stubbed_input_source import StubbedInputSource
 from Implementations.Mappers.simple_mapper import SimpleMapper
 from Implementations.Serializers.in_memory_serializer import InMemorySerializer
+import os
 
 rev1 = [
     "a",
@@ -349,8 +350,74 @@ def test_multiple_file_deserialization():
     beginning = orchestrator.orchestrate()
     mappings = in_memory_serializer.deserialize(None)
     assert mapper.get_mapping(1, 1, 1) == mappings[0][1][1]
+    assert mapper.get_mapping(2, 2, 1) == mappings[0][2][2]
+    assert mapper.get_mapping(8, 8, 1) == mappings[0][8][8]
 
+    assert mapper.get_mapping(1, 1, 2) == mappings[1][1][1]
+    assert mapper.get_mapping(5, 7, 2) == mappings[1][5][7]
+    assert mapper.get_mapping(6, 8, 2) == mappings[1][6][8]
 
+    assert mapper.get_mapping(1, 1, 3) == mappings[2][1][1]
+    assert mapper.get_mapping(3, 7, 3) == mappings[2][3][7]
+    assert mapper.get_mapping(4, 8, 3) == mappings[2][4][8]
+
+def test_multiple_file_csv_deserialization():
+    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
+    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
+    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
+    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
+    revisions = [rev1, rev2, rev3, rev4]
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    csv_serializer = CsvFileSerializer("Data", "multi_line.csv")
+    networkx_graph = NetworkxGraph(csv_serializer)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    beginning = orchestrator.orchestrate()
+    mappings = csv_serializer.deserialize(os.path.join("Data", "multi_line.csv"))
+    assert mapper.get_mapping(1, 1, 1) == mappings[0][1][1]
+    assert mapper.get_mapping(2, 2, 1) == mappings[0][2][2]
+    assert mapper.get_mapping(8, 8, 1) == mappings[0][8][8]
+
+    assert mapper.get_mapping(1, 1, 2) == mappings[1][1][1]
+    assert mapper.get_mapping(5, 7, 2) == mappings[1][5][7]
+    assert mapper.get_mapping(6, 8, 2) == mappings[1][6][8]
+
+    assert mapper.get_mapping(1, 1, 3) == mappings[2][1][1]
+    assert mapper.get_mapping(3, 7, 3) == mappings[2][3][7]
+    assert mapper.get_mapping(4, 8, 3) == mappings[2][4][8]
+
+def test_graph_building_via_deserialization():
+    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
+    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
+    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
+    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
+    revisions = [rev1, rev2, rev3, rev4]
+    input_source = StubbedInputSource(revisions)
+
+    csv_serializer = CsvFileSerializer("Data", "multi_line.csv")
+    serializer = InMemorySerializer()
+    mappings = csv_serializer.deserialize(os.path.join("Data", "multi_line.csv"))
+    mapper = SimpleMapper(mappings)
+    networkx_graph = NetworkxGraph(serializer)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    beginning = orchestrator.orchestrate()
+
+    assert mapper.get_mapping(1, 1, 1) == mappings[0][1][1]
+    assert mapper.get_mapping(2, 2, 1) == mappings[0][2][2]
+    assert mapper.get_mapping(8, 8, 1) == mappings[0][8][8]
+
+    assert mapper.get_mapping(1, 1, 2) == mappings[1][1][1]
+    assert mapper.get_mapping(5, 7, 2) == mappings[1][5][7]
+    assert mapper.get_mapping(6, 8, 2) == mappings[1][6][8]
+
+    assert mapper.get_mapping(1, 1, 3) == mappings[2][1][1]
+    assert mapper.get_mapping(3, 7, 3) == mappings[2][3][7]
+    assert mapper.get_mapping(4, 8, 3) == mappings[2][4][8]
+
+test_graph_building_via_deserialization()
+test_multiple_file_csv_deserialization()
 test_multiple_file_deserialization()
 test_deserialization()
 test_with_actual_files()

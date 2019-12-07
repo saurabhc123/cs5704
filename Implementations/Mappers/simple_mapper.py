@@ -8,15 +8,17 @@ from Framework.node import Node
 
 class SimpleMapper(Mapper):
 
-    def __init__(self):
+    def __init__(self, mappings=None):
         self.matcher = SimpleMatcher()
         self.revisions = None
-        self.mappings = []
+        self.mappings = mappings
         pass
 
     def initialize_mappings(self, revisions):
         self.revisions = revisions
-        self.build_graph(self.revisions)
+        if self.mappings is None:
+            self.mappings = []
+            self.build_graph(self.revisions)
 
     def get_mapping(self, left_line_number: int, right_line_number: int, left_revision_number):
         if self.mappings[left_revision_number - 1] is not None:
