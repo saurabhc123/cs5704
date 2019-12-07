@@ -420,39 +420,40 @@ def test_graph_building_via_deserialization():
 
 def test_git_files_as_input():
 
-    bare_repo = Repo("./cs5704")
+    bare_repo = Repo("./")
     assert bare_repo
     path = "Framework/orchestrator.py"
     relevant_commits = list(bare_repo.iter_commits(paths=path))
-    #commit = bare_repo.commit('master')
 
+    revlist = (
+        (commit, (commit.tree / path).data_stream.read())
+        for commit in relevant_commits
+    )
 
+    revisions = []
+    for commit, filecontents in revlist:
+        str_file_contents = str(filecontents).split("\\n")
+        revisions.append(str_file_contents)
 
-    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
-    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
-    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
-    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
-    revisions = [rev1, rev2, rev3, rev4]
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
-    # csv_serializer = CsvFileSerializer("Data", "multi_line.csv")
-    # networkx_graph = NetworkxGraph(csv_serializer)
-    in_memory_serializer = InMemorySerializer()
-    networkx_graph = NetworkxGraph(in_memory_serializer)
+    csv_serializer = CsvFileSerializer("Data", "actual_code.csv")
+    networkx_graph = NetworkxGraph(csv_serializer)
     slicer = LineSlicer(networkx_graph)
     orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
 
+
 test_git_files_as_input()
-# test_graph_building_via_deserialization()
-# test_multiple_file_csv_deserialization()
-# test_multiple_file_deserialization()
-# test_deserialization()
-# test_with_actual_files()
-# test_check_displacement()
-# test_mutation_of_lines()
-# test_serialization()
-# test_right_addition()
-# test_blanks()
-# large_test()
-# test_multiple_files()
+test_graph_building_via_deserialization()
+test_multiple_file_csv_deserialization()
+test_multiple_file_deserialization()
+test_deserialization()
+test_with_actual_files()
+test_check_displacement()
+test_mutation_of_lines()
+test_serialization()
+test_right_addition()
+test_blanks()
+large_test()
+test_multiple_files()
