@@ -87,11 +87,11 @@ class SimpleMapper(Mapper):
                 ptr_left = ptr_left + 1
                 continue
 
-            ptr_left, ptr_right = self.handle_unmatched(ptr_left, ptr_right, left_nodes, right)
+            ptr_left, ptr_right = self.handle_unmatched(ptr_left, ptr_right, left_nodes, right, right_nodes)
 
         return right_nodes
 
-    def handle_unmatched(self, ptr_left: int, ptr_right: int, left_nodes: [Node], right):
+    def handle_unmatched(self, ptr_left: int, ptr_right: int, left_nodes: [Node], right, right_nodes):
         left_revision_number = left_nodes[ptr_left].revision_number
         right_revision_number = left_revision_number + 1
         current_revision_mappings: {} = self.mappings[left_revision_number - 1]
@@ -100,12 +100,16 @@ class SimpleMapper(Mapper):
         # If left_ptr out of bounds
         if ptr_left >= len(left_nodes):
             ptr_left = ptr_left - 1
+            new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
+            right_nodes.append(new_right_node)
             ptr_right = ptr_right + 1
             return ptr_left, ptr_right
         # Compare left_ptr and right
         left_node = left_nodes[ptr_left]
         match_result = self.matcher.evaluate_match(left_node.content, right[ptr_right])
         if "unmatched" in match_result:
+            new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
+            right_nodes.append(new_right_node)
             ptr_right = ptr_right + 1
             ptr_left = ptr_left - 1
             return ptr_left, ptr_right
@@ -113,6 +117,8 @@ class SimpleMapper(Mapper):
             if ptr_left + 1 not in current_revision_mappings:
                 current_revision_mappings[ptr_left + 1] = {}
             current_revision_mappings[ptr_left + 1][ptr_right + 1] = match_result
+            new_right_node = Node(match_result, ptr_right + 1, right[ptr_right], right_revision_number)
+            right_nodes.append(new_right_node)
             # Increment left_ptr and right_ptr by 1
             ptr_right = ptr_right + 1
             ptr_left = ptr_left + 1
