@@ -9,5 +9,5 @@ class Mapper(ABC):
     def initialize_mappings(self, revisions):
         pass
 
-    def get_mapping(self, left_line_number: int, right_line_number: int):
+    def get_mapping(self, left_line_number: int, right_line_number: int, left_revision_number):
         pass
