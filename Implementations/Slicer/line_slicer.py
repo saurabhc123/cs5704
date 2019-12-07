@@ -4,7 +4,7 @@ from Framework.graph import Graph
 from Framework.node import Node
 
 
-class LineSlicing(Slicer):
+class LineSlicer(Slicer):
 
     def __init__(self, graph: Graph):
         self.G = graph
@@ -77,6 +77,18 @@ class LineSlicing(Slicer):
                 succ_node = self.sub_graph.find_node_in_graph(s.get_node_id())
                 self.sub_graph.add_edge(curr_node, succ_node)
 
+    def slice(self, revision_number, line_number):
+        nodes, content_id = self.slice_line(revision_number, line_number)
 
+        self.visualize_subgraph(nodes)
+
+        return nodes, content_id
+
+    def visualize_subgraph(self, nodes_dict:dict):
+        for i in sorted(nodes_dict.keys()):
+            print(i.get_node_id())
+        # keys_list = list(nodes_dict.keys())
+        #
+        # revision_number, line_number =
 
 

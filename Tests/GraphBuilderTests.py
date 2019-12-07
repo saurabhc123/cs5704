@@ -2,7 +2,7 @@ import Implementations.GraphBuilder.old_graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
 from Framework.orchestrator import Orchestrator
 from Implementations.Graphs.networkx_graph import NetworkxGraph
-from Implementations.Slicer.line_slicing import LineSlicing
+from Implementations.Slicer.line_slicer import LineSlicer
 from Implementations.InputSources.stubbed_input_source import StubbedInputSource
 from Implementations.Mappers.simple_mapper import SimpleMapper
 from Implementations.Serializers.in_memory_serializer import InMemorySerializer
@@ -59,13 +59,21 @@ rev5 = [
 
 def large_test():
     revisions = [rev1, rev2, rev3, rev4, rev5]
-    networkx_graph = NetworkxGraph()
-    simple_matcher = SimpleMatcher()
-    slicer = LineSlicing(networkx_graph)
-    gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph, slicer)
-    beginning = gb_obj.build_graph(revisions)
+    # networkx_graph = NetworkxGraph()
+    # simple_matcher = SimpleMatcher()
+    # slicer = LineSlicing(networkx_graph)
+    # gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph, slicer)
+    # beginning = gb_obj.build_graph(revisions)
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    beginning = orchestrator.orchestrate()
+
     print(beginning[1][1].content)
-    slicing_dict, slicing_dict_content = gb_obj.slice(2, 2)
+    slicing_dict, slicing_dict_content = orchestrator.slice(2, 2)
     print(slicing_dict)
     print(slicing_dict_content)
 
@@ -92,7 +100,8 @@ def test_check_displacement():
     mapper = SimpleMapper()
     in_memory_serializer = InMemorySerializer()
     networkx_graph = NetworkxGraph(in_memory_serializer)
-    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
 
     assert beginning[1][3].label == "u"
@@ -121,7 +130,8 @@ def test_mutation_of_lines():
     mapper = SimpleMapper()
     in_memory_serializer = InMemorySerializer()
     networkx_graph = NetworkxGraph(in_memory_serializer)
-    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
 
     assert beginning[1][0].label == "u"
@@ -163,7 +173,8 @@ def test_right_addition():
     mapper = SimpleMapper()
     in_memory_serializer = InMemorySerializer()
     networkx_graph = NetworkxGraph(in_memory_serializer)
-    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
 
     assert beginning[0][2].label == "a"
@@ -220,7 +231,8 @@ def test_with_actual_files():
     mapper = SimpleMapper()
     in_memory_serializer = InMemorySerializer()
     networkx_graph = NetworkxGraph(in_memory_serializer)
-    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
 
 
@@ -262,7 +274,8 @@ def test_serialization():
     mapper = SimpleMapper()
     in_memory_serializer = InMemorySerializer()
     networkx_graph = NetworkxGraph(in_memory_serializer)
-    orchestrator = Orchestrator(input_source, mapper, networkx_graph)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
     assert beginning[1][0].label == "u"
     assert beginning[1][2].label == "u"

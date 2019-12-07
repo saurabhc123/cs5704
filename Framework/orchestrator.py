@@ -2,6 +2,7 @@ from Framework.graph import Graph
 from Framework.graph_builder import GraphBuilder
 from Framework.input_source import InputSource
 from Framework.mapper import Mapper
+from Framework.slicer import Slicer
 from Implementations.Graphs.networkx_graph import NetworkxGraph
 from Implementations.Serializers.in_memory_serializer import InMemorySerializer
 import Implementations.GraphBuilder.simple_graph_builder as gb
@@ -12,10 +13,12 @@ class Orchestrator:
     def __init__(self,
                  input_source: InputSource,
                  mapper: Mapper,
-                 graph: Graph):
+                 graph: Graph,
+                 slicer: Slicer):
         self.input_source = input_source
         self.mapper = mapper
         self.graph = graph
+        self.slicer = slicer
 
     def orchestrate(self):
 
@@ -28,3 +31,6 @@ class Orchestrator:
         beginning = gb_obj.build_graph(file_revisions)
         gb_obj.graph.serialize_graph()
         return beginning
+
+    def slice(self, revision_number, line_number):
+        return self.slicer.slice(revision_number, line_number)

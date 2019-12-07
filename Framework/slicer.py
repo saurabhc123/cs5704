@@ -15,3 +15,6 @@ class Slicer(ABC):
 
     def create_slice_subgraph(self, slicing_dict_nodes: dict):
         pass
+
+    def slice(self, revision_number: int, line_number: int):
+        pass
