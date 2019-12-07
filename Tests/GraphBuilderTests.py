@@ -108,6 +108,7 @@ def test_check_displacement():
     assert beginning[1][3].label == "u"
     assert beginning[1][4].label == "a"
 
+
 def test_mutation_of_lines():
     rev1 = [
         "a",
@@ -141,6 +142,7 @@ def test_mutation_of_lines():
     assert beginning[1][3].label == "u"
     assert beginning[1][4].label == "u"
     assert beginning[1][5].label == "c"
+
 
 def test_right_addition():
     rev1 = [
@@ -185,6 +187,7 @@ def test_right_addition():
     assert beginning[1][4].label == "u"
     assert beginning[1][5].label == "u"
 
+
 def test_blanks():
     rev1 = [
         "e",
@@ -227,6 +230,7 @@ def ReadTextFromFile(file_name):
     f = open(file_name, "r")
     return f.read().split('\n')
 
+
 def test_with_actual_files():
     rev1 = ReadTextFromFile("Data/Rev1")
     rev2 = ReadTextFromFile("Data/Rev2")
@@ -260,6 +264,7 @@ def test_multiple_files():
     print(beginning[2][4].label)
     nodes, content = orchestrator.slice(3, 5)
     print(content)
+
 
 def test_serialization():
     rev1 = [
@@ -326,6 +331,27 @@ def test_deserialization():
     assert beginning[1][3].label == "u"
     assert beginning[1][5].label == "c"
 
+
+def test_multiple_file_deserialization():
+    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
+    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
+    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
+    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
+    revisions = [rev1, rev2, rev3, rev4]
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    # csv_serializer = CsvFileSerializer("Data", "multi_line.csv")
+    # networkx_graph = NetworkxGraph(csv_serializer)
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    beginning = orchestrator.orchestrate()
+    mappings = in_memory_serializer.deserialize(None)
+    assert mapper.get_mapping(1, 1, 1) == mappings[0][1][1]
+
+
+test_multiple_file_deserialization()
 test_deserialization()
 test_with_actual_files()
 test_check_displacement()
@@ -335,10 +361,3 @@ test_right_addition()
 test_blanks()
 large_test()
 test_multiple_files()
-
-
-
-
-
-
-

@@ -49,6 +49,9 @@ class SimpleMapper(Mapper):
 
             # if no more to process on the left side, but more on the right side
             if ptr_left >= len(left_nodes) and ptr_right < len(right):
+                for i in range(ptr_right, len(right)):
+                    new_right_node = Node("a", ptr_right + 1, right[ptr_right], revision_number + 1)
+                    right_nodes.append(new_right_node)
                 break
 
             # If more to process on the left side and no more to process on the right side,
@@ -61,6 +64,8 @@ class SimpleMapper(Mapper):
                 if ptr_left + 1 not in current_revision_mappings:
                     current_revision_mappings[ptr_left + 1] = {}
                 current_revision_mappings[ptr_left + 1][ptr_right + 1] = match_result
+                new_right_node = Node(match_result, ptr_right + 1, right[ptr_right], revision_number + 1)
+                right_nodes.append(new_right_node)
                 ptr_left = ptr_left + 1
                 ptr_right = ptr_right + 1
                 continue
@@ -70,6 +75,8 @@ class SimpleMapper(Mapper):
                 if ptr_left + 1 not in current_revision_mappings:
                     current_revision_mappings[ptr_left + 1] = {}
                 current_revision_mappings[ptr_left + 1][ptr_right + 1] = match_result
+                new_right_node = Node(match_result, ptr_right + 1, right[ptr_right], revision_number + 1)
+                right_nodes.append(new_right_node)
                 ptr_right = ptr_right + 1
                 continue
 
