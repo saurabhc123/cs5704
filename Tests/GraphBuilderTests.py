@@ -418,6 +418,7 @@ def test_git_files_as_input():
     bare_repo = Repo("./")
     assert bare_repo
     path = "Framework/orchestrator.py"
+    path = "Tests/GraphBuilderTests.py"
     relevant_commits = list(bare_repo.iter_commits(paths=path))
 
     revlist = (
