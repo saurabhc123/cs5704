@@ -1,149 +1,258 @@
-import networkx as nx
-from Framework.self import Node
-from fuzzywuzzy import fuzz
+import tensorflow as tf
+from tensorflow.contrib.layers import fully_connected
+from tensorflow.examples.tutorials.mnist import input_data
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+#from skimage.transform import resize
+import scipy as sc
+import ConvHelper
+import pickle
+import csv as csv
+import datetime
+import os as os
+import random
+import Placeholders
+import KaggleRNNDataManager
+import word2Vec as w2v
 
 
-class GraphBuilder():
-
-    def __init__(self, matcher):
-        self.G = nx.MultiDiGraph()
-        self.matcher = matcher
-        pass
-
-    def build_graph(self, revisions):
-        first_revision = revisions[0]
-        starting_nodes = self.initialize_first_revision(first_revision)
-        print(list(self.G.nodes(data=True)))
-        for revision_number in range(1, len(revisions)):
-            starting_nodes = self.build_graph_from_subsequent_revisions(starting_nodes, revisions[revision_number], revision_number)
-        return starting_nodes
-
-    def build_graph_from_subsequent_revisions(self, left_nodes, right:[str], revision_number):
-        ptr_left = 0
-        ptr_right = 0
-        right_nodes = []
-        while True:
-            # if no more to process on the right side and the left side
-            if ptr_left >= len(left_nodes) and ptr_right >= len(right):
-                break
-
-            # if no more to process on the left side, but more on the right side
-            # Iterate through the right nodes, and add all of them (added) as the right nodes array and the graph
-            if ptr_left >= len(left_nodes) and ptr_right < len(right):
-                for i in range(ptr_right, len(right)):
-                    new_right_node = Node("a", ptr_right + 1, right[ptr_right], revision_number + 1)
-                    right_nodes.append(new_right_node)
-                    self.G.add_node(new_right_node, id=new_right_node.get_node_id())
-                break
-
-            # If more to process on the left side and no more to process on the right side,
-            # Iterate through the left nodes, and mark all of them as (deleted) the left nodes array.
-            # Find the left self on the graph. Change its label.
-            if ptr_left < len(left_nodes) and ptr_right >= len(right):
-                for i in range(ptr_left, len(left_nodes)):
-                    if self.G.out_degree(left_nodes[i]) > 0:
-                        continue
-                    graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[i]]['id']) - 1]
-                    graph_node.label = "d"
-                break
-
-            left_node = left_nodes[ptr_left]
-            if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'u':
-                new_right_node = Node("u", ptr_right + 1, right[ptr_right], revision_number + 1)
-                self.G.add_node(new_right_node, id=new_right_node.get_node_id())
-                self.G.add_edge(left_node, new_right_node)
-                right_nodes.append(new_right_node)
-                ptr_left = ptr_left + 1
-                ptr_right = ptr_right + 1
-                continue
-
-            if self.matcher.evaluate_match(left_node.content, right[ptr_right]) == 'c':
-                new_right_node = Node("c", ptr_right + 1, right[ptr_right], revision_number + 1)
-                self.G.add_node(new_right_node,id = new_right_node.get_node_id())
-                self.G.add_edge(left_node, new_right_node)
-                right_nodes.append(new_right_node)
-                ptr_right = ptr_right + 1
-                continue
-
-            # if the self contents do not match:
-            # Condition 1: keep left static, look ahead 1 on right side & compare; if they don't match, then left has
-            # been deleted, want to locally increment left to keep track of position; if they do match, mark as 'u',
-            # increment left, keep right the same (might need to check in-degree values)
-            # Condition 2: keep right static, look ahead 1 on left & compare; don't match, if left doesn't have an
-            # out-degree, then mark right as 'a', locally increment right; do match, mark as 'u', increment right, keep
-            # left the same (in-degree)
-
-            # if self.evaluate_match(left_node.content, right[ptr_right]) == 'unmatched':
-                # if (ptr_right + 1 < len(right)):
-                #     if self.evaluate_match(left_node.content, right[ptr_right + 1]) == 'unmatched':
-                #         graph_node = list(self.G.nodes)[int(self.G.nodes[left_nodes[ptr_left]]['id']) - 1]
-                #         graph_node.label = "d"
-                #         ptr_left = ptr_left + 1
-                #     elif self.evaluate_match(left_node.content, right[ptr_right + 1]) == 'u':
-
-                # Unmatched
-            if self.G.out_degree(left_node) > 0:
-                ptr_left = ptr_left + 1
-                continue
-
-            ptr_left, ptr_right = self.handle_unmatched(ptr_left, ptr_right, left_nodes, right, right_nodes)
-
-        return right_nodes
-
-    #   c       b.4
-    #   b.3     c
-    def handle_unmatched(self, ptr_left:int, ptr_right:int, left_nodes:[Node], right, right_nodes:[Node]):
-        left_revision_number = left_nodes[ptr_left].revision_number
-        right_revision_number = left_revision_number + 1
-        # Increment the left ptr
-        ptr_left = ptr_left + 1
-        # If left_ptr out of bounds
-        if ptr_left >= len(left_nodes):
-            ptr_left = ptr_left - 1
-            # right is an "a" add to graph
-            new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
-            self.G.add_node(new_right_node, id=new_right_node.get_node_id())
-            right_nodes.append(new_right_node)
-            # move right ptr by 1
-            ptr_right = ptr_right + 1
-            return ptr_left, ptr_right
-        # Compare left_ptr and right
-        left_node = left_nodes[ptr_left]
-        match_status = self.matcher.evaluate_match(left_node.content, right[ptr_right])
-        if "unmatched" in match_status:
-            # Unmatched
-            # Create right self as "a" and add to the graph
-            # Add to the right_nodes list
-            new_right_node = Node("a", ptr_right + 1, right[ptr_right], right_revision_number)
-            self.G.add_node(new_right_node, id=new_right_node.get_node_id())
-            right_nodes.append(new_right_node)
-            ptr_right = ptr_right + 1
-            ptr_left = ptr_left - 1
-            return ptr_left, ptr_right
-        else:
-            # Mark left_ptr - 1 as "d"
-            left_node_to_be_changed = list(self.G.nodes)[int(self.G.nodes[left_nodes[ptr_left - 1]]['id']) - 1]
-            left_node_to_be_changed.label = "d"
-            # Create right self as "u" and add to the graph
-            new_right_node = Node("u", ptr_right + 1, right[ptr_right], right_revision_number)
-            self.G.add_node(new_right_node, id=new_right_node.get_node_id())
-            # Add to the right_nodes list
-            right_nodes.append(new_right_node)
-            # Add an edge between left_ptr and right_ptr + 1
-            self.G.add_edge(left_node, new_right_node)
-            # Increment left_ptr and right_ptr by 1
-            ptr_right = ptr_right + 1
-            ptr_left = ptr_left + 1
-            return ptr_left, ptr_right
+model_folder_name = "models/adience"
+model_filename = os.path.join(model_folder_name,"main_model.ckpt")
+STEPS = 50
+MINIBATCH_SIZE = 100
 
 
-    def initialize_first_revision(self, first_revision):
-        nodes = []
-        line_number = 1
-        for line_content in first_revision:
-            new_node = Node('a', line_number, line_content, 1)
-            nodes.append(new_node)
-            line_number = line_number + 1
-            self.G.add_node(new_node, id = new_node.get_node_id())
-        return nodes
+#Kaggle data
+current_working_folder = os.path.dirname(os.getcwd())
+kaggle_files_path = os.path.join(current_working_folder, 'Project/Datasets/Kaggle/')
+kaggle_images_path = os.path.join(current_working_folder, 'Project/Datasets/Kaggle/Images')
+train_metadata_filename = 'Kaggle-str-process.csv'
+test_metadata_filename = 'Kaggle-str-process.csv'
+today = datetime.datetime.now()
+format = "%d_%m_%Y_%H_%M_%S"
+run_folder = today.strftime(format)
+
+
+x_main = tf.placeholder(tf.float32, shape=[None, Placeholders.feature_width])
+keep_prob = tf.placeholder(tf.float32)
+
+
+
+
+
+x = Placeholders.x
+y_ = Placeholders.y_
+
+def test(sess, accuracy, test,fc7, word_vec, y_conv, correct_prediction,loss, kdm, epoch, datasetType = "Test"):
+    print ("Starting Test")
+    number_of_test_batches = 5
+    number_of_samples_per_batch = 10
+    total_samples = number_of_test_batches * number_of_samples_per_batch
+    random_index = random.randint(0,len(test.features) - total_samples)
+
+    #print len(adience.test.images)
+    data = test
+    batch_features = data.features[random_index:random_index+total_samples]
+    batch_labels = data.labels[random_index:random_index+total_samples]
+    batch_x = batch_features.reshape(-1, Placeholders.feature_width)
+
+    acc = sess.run(accuracy, feed_dict={x_main: batch_x, y_: batch_labels,
+                                     keep_prob: 1.0})
+    print (datasetType + " Accuracy: {:.4}%".format(acc * 100))
+    mse = loss.eval(feed_dict={x_main: batch_x, y_: batch_labels, keep_prob: 1.0})
+    predictions = np.array(sess.run(tf.argmax(y_conv, 1), feed_dict={x_main: batch_x, y_: batch_labels, keep_prob: 1.0}))
+    correct_predictions = np.array(sess.run(correct_prediction, feed_dict={x_main: batch_x, y_: batch_labels, keep_prob: 1.0}))
+    raw_data = kdm.test_raw if datasetType == "Test" else (kdm.train_raw if datasetType == "Train" else kdm.validation_raw)
+    write_results_to_file(mse, acc * 100, raw_data, predictions, correct_predictions, epoch, datasetType)
+    return acc * 100
+
+
+def test_all(sess, accuracy, test,fc7, word_vec, y_conv, correct_prediction,loss, kdm, epoch = 0, datasetType = "Test"):
+    print ("Starting test on all data:" + datasetType)
+
+    #print len(adience.test.images)
+    data = test
+    #batch_features =  data.features
+    #batch_labels = data.labels
+    batch_features = data.features[:, :Placeholders.feature_width]
+    batch_labels = one_hot(data.features[:, Placeholders.feature_width])
+    #batch_x = batch_features#batch_features.reshape(-1, Placeholders.feature_width)
+
+    features = batch_features[:, :Placeholders.feature_width]
+    # print(batch[0][:,Placeholders.feature_width])
+    labels = one_hot(batch_features[:, -1])
+    # print("Features shape:")
+    # print(features.shape)
+    # print(labels.shape)
+    batch_x = features
+    rnn_features = np.array(features[:, Placeholders.img_feature_width + Placeholders.profile_color_feature_length:]) \
+        .reshape((-1, Placeholders.n_steps, Placeholders.n_inputs))
+
+    other_features = features[:, :Placeholders.img_feature_width + Placeholders.profile_color_feature_length]
+    acc = sess.run(accuracy, feed_dict={Placeholders.rnn_X: rnn_features,
+                                        Placeholders.rnn_other_features: other_features,
+                                        y_: labels,
+                                        keep_prob: 1.0})
+    print (datasetType + " Accuracy: {:.4}%".format(acc * 100))
+    mse = loss.eval(feed_dict={Placeholders.rnn_X: rnn_features,
+                               Placeholders.rnn_other_features: other_features,
+                               y_: labels,
+                               keep_prob: 1.0})
+    print(datasetType + " Loss: {:.4}".format(mse))
+    predictions = np.array(sess.run(tf.argmax(y_conv, 1),
+                            feed_dict={Placeholders.rnn_X: rnn_features,
+                                       Placeholders.rnn_other_features: other_features,
+                                       y_: labels,
+                                       keep_prob: 1.0}))
+    correct_predictions = np.array(sess.run(correct_prediction,
+                                    feed_dict={Placeholders.rnn_X: rnn_features,
+                                               Placeholders.rnn_other_features: other_features,
+                                               y_: labels,
+                                               keep_prob: 1.0}))
+    raw_data = kdm.test_raw if datasetType == "Test" else (kdm.train_raw if datasetType == "Train" else kdm.validation_raw)
+    write_results_to_file(mse, acc * 100, raw_data, predictions, correct_predictions, epoch, datasetType)
+    return acc*100
+
+
+def train(sess, train, retrain, fc7):
+    output_folder = os.path.join(current_working_folder,"Project/output")
+    output_folder = os.path.join(output_folder, run_folder)
+    if not os.path.exists(output_folder):
+        print("Creating folder: " + output_folder)
+        os.makedirs(output_folder)
+    else:
+        print("Folder exists: " + output_folder)
+
+    word_vec = w2v.word2vec()
+    kdm = KaggleRNNDataManager.KaggleRNNDataManager(kaggle_files_path + train_metadata_filename, sess, fc7, word_vec)
+
+
+    with tf.variable_scope("gru"):
+        gru_cell = tf.contrib.rnn.GRUCell(Placeholders.n_neurons)
+        outputs, states = tf.nn.dynamic_rnn(gru_cell, Placeholders.rnn_X, dtype=tf.float32)
+
+    all_features = tf.concat([states, Placeholders.rnn_other_features], 1)
+    y_conv = tf.layers.dense(all_features, Placeholders.n_classes)
+    #xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels= Placeholders.y_ , logits= logits)
+    #loss = tf.reduce_mean(xentropy)
+    #optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    #optimizer = tf.train.RMSPropOptimizer(0.1, 0.9, 0.01)
+    #training_op = optimizer.minimize(loss)
+    #correct = tf.nn.in_top_k(logits, Placeholders.y_, 1)
+
+
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits= y_conv,
+                                                                   labels=y_))
+    loss = tf.reduce_mean(cross_entropy)
+    #train_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
+    train_step = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(loss)
+
+    correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    # Add ops to save and restore all the variables.
+    saver = tf.train.Saver()
+
+    STEPS = 300
+    MINIBATCH_SIZE = 50
+
+    #Retrieve training data
+
+    #training_data = get_fc7_representation(train, sess, fc7)
+
+    if os.path.exists(model_folder_name) & (not retrain):
+        print("Model found in file: %s" % model_filename)
+        saver.restore(sess, model_filename)
+    else:
+        if (retrain) & os.path.exists(model_folder_name):
+            print ("Retraining the model.")
+        print ("Starting at:" , datetime.datetime.now())
+        sess.run(tf.global_variables_initializer())
+        print ("Initialization done at:" , datetime.datetime.now())
+        for epoch in range(STEPS):
+            print ("Starting epoch", epoch, " at:", datetime.datetime.now())
+            for batch_count in range(int(len(kdm.train.features)/MINIBATCH_SIZE)):
+                batch = kdm.next_batch(MINIBATCH_SIZE)
+                features = batch[0][:,:Placeholders.feature_width]
+                #print(batch[0][:,Placeholders.feature_width])
+                labels = one_hot(batch[0][:,Placeholders.feature_width])
+                #print("Features shape:")
+                #print(features.shape)
+                #print(labels.shape)
+                batch_x = features
+                #print("RNN features shape:")
+                rnn_features = np.array(features[:, Placeholders.img_feature_width + Placeholders.profile_color_feature_length:])\
+                                .reshape((-1, Placeholders.n_steps, Placeholders.n_inputs))
+                #print(rnn_features.shape)
+                other_features = features[:, :Placeholders.img_feature_width + Placeholders.profile_color_feature_length]
+                #other_features = np.zeros((MINIBATCH_SIZE, Placeholders.img_feature_width + Placeholders.profile_color_feature_length))
+                sess.run(train_step, feed_dict={Placeholders.rnn_X: rnn_features,
+                                                Placeholders.rnn_other_features : other_features,
+                                                y_: labels,
+                                                keep_prob: 0.5})
+                # acc = sess.run(accuracy, feed_dict={Placeholders.rnn_X: rnn_features,
+                #                                 Placeholders.rnn_other_features : other_features,
+                #                                 y_: labels,
+                #                                 keep_prob: 1.0})
+                # print ("Accuracy: {:.4}%".format(acc * 100))
+            if(epoch%10 == 0):
+                mse = loss.eval(feed_dict={Placeholders.rnn_X: rnn_features,
+                                            Placeholders.rnn_other_features : other_features,
+                                            y_: labels,
+                                            keep_prob: 0.5})
+                print("Iter " + str(epoch) + ", Minibatch Loss= " + \
+                      "{:.6f}".format(mse))
+                train_accuracy = test_all(sess, accuracy, kdm.train, fc7, word_vec, y_conv, correct_prediction, loss, kdm, epoch, datasetType="Train")
+                validation_accuracy = test_all(sess, accuracy, kdm.validation, fc7, word_vec, y_conv, correct_prediction, loss, kdm, epoch, datasetType="Validation")
+                #test_accuracy = test(sess, accuracy, kdm.test, fc7, word_vec, y_conv, correct_prediction, loss, epoch, datasetType="Test")
+                if (validation_accuracy > Placeholders.best_accuracy_so_far):
+                    Placeholders.best_accuracy_so_far = validation_accuracy
+                    test_all(sess, accuracy, kdm.test, fc7, word_vec, y_conv, correct_prediction, loss, kdm, epoch)
+                elif (train_accuracy > 70):
+                    test_all(sess, accuracy, kdm.test, fc7, word_vec, y_conv, correct_prediction, loss, kdm, epoch)
+        test_all(sess, accuracy, kdm.test, fc7, word_vec, y_conv, correct_prediction, loss, kdm)
+        save_path = saver.save(sess, model_filename)
+        print("Model saved in file: %s" % save_path)
+    return accuracy
+
+def one_hot(vec, vals = Placeholders.n_classes):
+    n = len(vec)
+    vec = [int(val) for val in vec]
+    out = np.zeros((n, vals))
+    out[range(n), vec] = 1
+    return out
+
+def write_results_to_file(loss, accuracy, test_data_raw, predictions, correct_predictions, epoch, datasetType):
+    today = datetime.datetime.now()
+    format = "_%d_%m_%Y_%H_%M_%S"
+    filename = "output/" + run_folder + "/" + datasetType + today.strftime(format) + "_Iteration_" + str(epoch)  + "_Accuracy_" + str(round(accuracy, 2)) + ".csv"
+    with open(filename, 'wt') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        wr.writerow([datasetType + " Accuracy = " + str(accuracy)])
+        wr.writerow(["Loss = " + str(loss)])
+        wr.writerow(get_header())
+        for i in range(len(test_data_raw)):
+            local_result = []
+            local_result.append(test_data_raw[i].name)
+            local_result.append(test_data_raw[i].description)
+            local_result.append(test_data_raw[i].tweet_text)
+            local_result.append(test_data_raw[i].link_color)
+            local_result.append(test_data_raw[i].sidebar_color)
+            local_result.append(test_data_raw[i].label)
+            local_result.append(predictions[i])
+            local_result.append(correct_predictions[i])
+            wr.writerow(local_result)
+
+def get_header():
+    header = []
+    header.append('name')
+    header.append('description')
+    header.append('tweet_text')
+    header.append('link_color')
+    header.append('sidebar_color')
+    header.append('true label')
+    header.append('predicted label')
+    header.append('correct_prediction')
+    return header
 

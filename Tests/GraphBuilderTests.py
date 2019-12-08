@@ -460,20 +460,50 @@ def test_git_url_as_input():
     beginning = orchestrator.orchestrate()
     j = 0
 
+def test_fix_bug():
+    rev1 = [
+        "m",
+        "b.1",
+        "b.2",
+        "c",
+        "b.3"
+    ]
+
+    rev2 = [
+        "a",
+        "b.1",
+        "b.2",
+        "b.3",
+        "c"
+    ]
+
+    revisions = [rev1, rev2]
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    in_memory_serializer = InMemorySerializer()
+    networkx_graph = NetworkxGraph(in_memory_serializer)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    beginning = orchestrator.orchestrate()
+
+    assert beginning[1][3].label == "u"
+    assert beginning[1][4].label == "a"
+
 # Just adding a few more changes for the code to test the code changes.
-test_git_url_as_input()
-test_git_files_as_input()
-test_graph_building_via_deserialization()
-test_multiple_file_csv_based_deserialization()
-test_multiple_file_in_memory_deserialization()
-test_deserialization()
-test_with_actual_files()
-test_check_displacement()
-test_mutation_of_lines()
-test_serialization()
-test_right_addition()
-test_blanks()
-large_test()
-test_multiple_files()
+test_fix_bug()
+# test_git_url_as_input()
+# test_git_files_as_input()
+# test_graph_building_via_deserialization()
+# test_multiple_file_csv_based_deserialization()
+# test_multiple_file_in_memory_deserialization()
+# test_deserialization()
+# test_with_actual_files()
+# test_check_displacement()
+# test_mutation_of_lines()
+# test_serialization()
+# test_right_addition()
+# test_blanks()
+# large_test()
+# test_multiple_files()
 
 # This is the end of the tests.
