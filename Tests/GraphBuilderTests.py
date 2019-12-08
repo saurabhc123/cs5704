@@ -2,6 +2,7 @@ import Implementations.GraphBuilder.old_graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
 from Framework.orchestrator import Orchestrator
 from Implementations.Graphs.networkx_graph import NetworkxGraph
+from Implementations.Mappers.fuzzy_mapper import FuzzyMapper
 from Implementations.Serializers.csv_file_serializer import CsvFileSerializer
 from Implementations.Slicer.line_slicer import LineSlicer
 from Implementations.InputSources.stubbed_input_source import StubbedInputSource
@@ -256,14 +257,15 @@ def test_multiple_files():
     # gb_obj = gb.GraphBuilder(simple_matcher, networkx_graph)
     # beginning = gb_obj.build_graph(revisions)
     input_source = StubbedInputSource(revisions)
-    mapper = SimpleMapper()
+    mapper = FuzzyMapper()
     in_memory_serializer = InMemorySerializer()
     networkx_graph = NetworkxGraph(in_memory_serializer)
     slicer = LineSlicer(networkx_graph)
     orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
-    print(beginning[2][4].label)
-    nodes, content = orchestrator.slice(3, 5)
+    print(beginning[1][2])
+    nodes, content = orchestrator.slice(1, 4)
+    print(nodes)
     print(content)
 
 
@@ -416,15 +418,15 @@ def test_graph_building_via_deserialization():
     assert mapper.get_mapping(3, 7, 3) == mappings[2][3][7]
     assert mapper.get_mapping(4, 8, 3) == mappings[2][4][8]
 
-test_graph_building_via_deserialization()
-test_multiple_file_csv_deserialization()
-test_multiple_file_deserialization()
-test_deserialization()
-test_with_actual_files()
-test_check_displacement()
-test_mutation_of_lines()
-test_serialization()
-test_right_addition()
-test_blanks()
-large_test()
+# test_graph_building_via_deserialization()
+# test_multiple_file_csv_deserialization()
+# test_multiple_file_deserialization()
+# test_deserialization()
+# test_with_actual_files()
+# test_check_displacement()
+# test_mutation_of_lines()
+# test_serialization()
+# test_right_addition()
+# test_blanks()
+# large_test()
 test_multiple_files()
