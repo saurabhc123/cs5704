@@ -269,8 +269,11 @@ def test_multiple_files():
     orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
     print(beginning[2][4].label)
-    nodes, content = orchestrator.slice(3, 5)
-    print(content)
+    # nodes, content = orchestrator.slice(3, 5)
+    # print(content)
+
+    nodes, content = orchestrator.slice_updated(4, 1, 1, 4, True)
+    print(sorted(content))
 
 
 def test_serialization():
@@ -441,7 +444,6 @@ def test_git_files_as_input():
     orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
     j = 0
-
 
 def test_git_url_as_input():
     input_url = "https://github.com/saurabhc123/cs5704/blob/master/Tests/GraphBuilderTests.py"
