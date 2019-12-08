@@ -2,6 +2,7 @@ import Implementations.GraphBuilder.old_graph_builder as gb
 from Framework.Matchers.simple_matcher import SimpleMatcher
 from Framework.orchestrator import Orchestrator
 from Implementations.Graphs.networkx_graph import NetworkxGraph
+from Implementations.InputSources.git_input_source import GitInputSource
 from Implementations.Serializers.csv_file_serializer import CsvFileSerializer
 from Implementations.Slicer.line_slicer import LineSlicer
 from Implementations.InputSources.stubbed_input_source import StubbedInputSource
@@ -441,8 +442,20 @@ def test_git_files_as_input():
     beginning = orchestrator.orchestrate()
     j = 0
 
-# Just adding a few more changes for the code to test the code changes.
 
+def test_git_url_as_input():
+    input_url = "https://github.com/saurabhc123/cs5704/blob/master/Tests/GraphBuilderTests.py"
+    input_source = GitInputSource(input_url)
+    mapper = SimpleMapper()
+    csv_serializer = CsvFileSerializer("Data", "git_url_code.csv")
+    networkx_graph = NetworkxGraph(csv_serializer)
+    slicer = LineSlicer(networkx_graph)
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    beginning = orchestrator.orchestrate()
+    j = 0
+
+# Just adding a few more changes for the code to test the code changes.
+test_git_url_as_input()
 test_git_files_as_input()
 test_graph_building_via_deserialization()
 test_multiple_file_csv_based_deserialization()
