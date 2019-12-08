@@ -275,8 +275,8 @@ def test_multiple_files():
     # nodes, content = orchestrator.slice(3, 5)
     # print(content)
 
-    nodes, content = orchestrator.slice_updated(4, 1, 1, 4, True)
-    revisions = orchestrator.visualize(content)
+    nodes, content, arranged_slices = orchestrator.slice_updated(4, 1, 1, 4, True)
+    revisions = orchestrator.visualize(arranged_slices, False)
     print(sorted(content))
 
 
@@ -460,20 +460,35 @@ def test_git_url_as_input():
     beginning = orchestrator.orchestrate()
     j = 0
 
+def test_multiple_files_with_git_url_as_input():
+    input_url = "https://github.com/saurabhc123/cs5704/blob/master/Tests/GraphBuilderTests.py"
+    input_source = GitInputSource(input_url)
+    mapper = SimpleMapper()
+    csv_serializer = CsvFileSerializer("Data", "git_url_code.csv")
+    networkx_graph = NetworkxGraph(csv_serializer)
+    slicer = LineSlicer(networkx_graph)
+    visualizer = CommandLineVisualizer()
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer, visualizer)
+    beginning = orchestrator.orchestrate()
+
+    nodes, content, arranged_slices = orchestrator.slice_updated(1, 4, 4, 12, True)
+    orchestrator.visualize(arranged_slices)
+
 # Just adding a few more changes for the code to test the code changes.
-test_git_url_as_input()
-test_git_files_as_input()
-test_graph_building_via_deserialization()
-test_multiple_file_csv_based_deserialization()
-test_multiple_file_in_memory_deserialization()
-test_deserialization()
-test_with_actual_files()
-test_check_displacement()
-test_mutation_of_lines()
-test_serialization()
-test_right_addition()
-test_blanks()
-large_test()
-test_multiple_files()
+# test_git_url_as_input()
+# test_git_files_as_input()
+# test_graph_building_via_deserialization()
+# test_multiple_file_csv_based_deserialization()
+# test_multiple_file_in_memory_deserialization()
+# test_deserialization()
+# test_with_actual_files()
+# test_check_displacement()
+# test_mutation_of_lines()
+# test_serialization()
+# test_right_addition()
+# test_blanks()
+# large_test()
+# test_multiple_files()
+test_multiple_files_with_git_url_as_input()
 
 # This is the end of the tests.

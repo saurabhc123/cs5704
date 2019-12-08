@@ -39,10 +39,12 @@ class NetworkxGraph(Graph):
         self.serializer.serialize(edge_tuples)
 
     def predecessors(self, node: Node):
-        return self.G.predecessors(node)
+        if node is not None:
+            return self.G.predecessors(node)
 
     def successors(self, node: Node):
-        return self.G.successors(node)
+        if node is not None:
+            return self.G.successors(node)
 
     def clear(self):
         self.G.clear()

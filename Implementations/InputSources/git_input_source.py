@@ -17,7 +17,7 @@ class GitInputSource(InputSource):
         else:
             self.input_source = input_source
         input_url, path =  self.process_input(input_source, self.branch_name)
-        working_directory = os.path.join(os.getenv('GIT_REPO_PATH'), "pc")
+        working_directory = "/Users/kccowan/Documents/College/F19/CS5704/Project/Temp/pc" #os.path.join(os.getenv('GIT_REPO_PATH'), "pc")
         if os.path.exists(working_directory):
             shutil.rmtree(working_directory)
         #path = "Tests/GraphBuilderTests.py"
