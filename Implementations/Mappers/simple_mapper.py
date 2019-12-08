@@ -72,7 +72,6 @@ class SimpleMapper(Mapper):
                 ptr_right = ptr_right + 1
                 continue
 
-            match_result = self.matcher.evaluate_match(left_node.content, right[ptr_right])
             if match_result == 'c':
                 if ptr_left + 1 not in current_revision_mappings:
                     current_revision_mappings[ptr_left + 1] = {}
