@@ -5,5 +5,5 @@ from Framework.node import Node
 
 class InputSource(ABC):
 
-    def get_files_with_revisions(self):
+    def get_files_with_revisions(self, input_source):
         pass
