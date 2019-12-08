@@ -12,6 +12,8 @@ import os
 import git
 from git import Repo
 
+from Implementations.Visualizers.command_line_visualizer import CommandLineVisualizer
+
 rev1 = [
     "a",
     "b",
@@ -78,9 +80,9 @@ def large_test():
     beginning = orchestrator.orchestrate()
 
     print(beginning[1][1].content)
-    slicing_dict, slicing_dict_content = orchestrator.slice(2, 2)
-    print(slicing_dict)
-    print(slicing_dict_content)
+    # slicing_dict, slicing_dict_content = orchestrator.slice(2, 2)
+    # print(slicing_dict)
+    # print(slicing_dict_content)
 
 
 def test_check_displacement():
@@ -266,13 +268,15 @@ def test_multiple_files():
     in_memory_serializer = InMemorySerializer()
     networkx_graph = NetworkxGraph(in_memory_serializer)
     slicer = LineSlicer(networkx_graph)
-    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
+    visualizer = CommandLineVisualizer()
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer, visualizer)
     beginning = orchestrator.orchestrate()
     print(beginning[2][4].label)
     # nodes, content = orchestrator.slice(3, 5)
     # print(content)
 
     nodes, content = orchestrator.slice_updated(4, 1, 1, 4, True)
+    revisions = orchestrator.visualize(content)
     print(sorted(content))
 
 
