@@ -114,20 +114,23 @@ def test_check_displacement():
 
 def test_mutation_of_lines():
     rev1 = [
-        "a",
-        "b",
-        "c",
-        "d",
-        "e"
+        "from Framework.graph import Graph",
+        "from Framework.graph_builder import GraphBuilder",
+        "from Framework.input_source import InputSource",
+        "from Framework.mapper import Mapper",
+        "from Implementations.Graphs.networkx_graph import NetworkxGraph",
+        "self.input_source = input_source",
+        "self.mapper = mapper"
     ]
 
     rev2 = [
-        "a",
-        "b.1",
-        "b.2",
-        "c",
-        "d",
-        "e.1"
+        "from Framework.graph import Graph",
+        "from Framework.graph_builder import GraphBuilder",
+        "from Framework.input_source import InputSource",
+        "from Framework.mapper import Mapper",
+        "from Implementations.Graphs.networkx_graph import NetworkxGraph",
+        "gb_obj = gb.SimpleGraphBuilder(self.mapper, self.graph)",
+        "self.mapper = mapper + fake_mapper"
     ]
     beginning = None
     revisions = [rev1, rev2]
@@ -140,11 +143,11 @@ def test_mutation_of_lines():
     beginning = orchestrator.orchestrate()
 
     assert beginning[1][0].label == "u"
-    assert beginning[1][1].label == "c"
-    assert beginning[1][2].label == "c"
+    assert beginning[1][1].label == "u"
+    assert beginning[1][2].label == "u"
     assert beginning[1][3].label == "u"
     assert beginning[1][4].label == "u"
-    assert beginning[1][5].label == "c"
+    assert beginning[1][6].label == "c"
 
 
 def test_right_addition():
@@ -299,7 +302,6 @@ def test_serialization():
     assert beginning[1][0].label == "u"
     assert beginning[1][2].label == "u"
     assert beginning[1][3].label == "u"
-    assert beginning[1][5].label == "c"
 
 
 def test_deserialization():
@@ -332,10 +334,10 @@ def test_deserialization():
     assert beginning[1][0].label == "u"
     assert beginning[1][2].label == "u"
     assert beginning[1][3].label == "u"
-    assert beginning[1][5].label == "c"
+    #assert beginning[1][5].label == "c"
 
 
-def test_multiple_file_deserialization():
+def test_multiple_file_in_memory_deserialization():
     rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
     rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
     rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
@@ -343,8 +345,6 @@ def test_multiple_file_deserialization():
     revisions = [rev1, rev2, rev3, rev4]
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
-    # csv_serializer = CsvFileSerializer("Data", "multi_line.csv")
-    # networkx_graph = NetworkxGraph(csv_serializer)
     in_memory_serializer = InMemorySerializer()
     networkx_graph = NetworkxGraph(in_memory_serializer)
     slicer = LineSlicer(networkx_graph)
@@ -353,15 +353,12 @@ def test_multiple_file_deserialization():
     mappings = in_memory_serializer.deserialize(None)
     assert mapper.get_mapping(1, 1, 1) == mappings[0][1][1]
     assert mapper.get_mapping(2, 2, 1) == mappings[0][2][2]
-    assert mapper.get_mapping(8, 8, 1) == mappings[0][8][8]
+    assert mapper.get_mapping(7, 7, 1) == mappings[0][7][7]
 
     assert mapper.get_mapping(1, 1, 2) == mappings[1][1][1]
-    assert mapper.get_mapping(5, 7, 2) == mappings[1][5][7]
-    assert mapper.get_mapping(6, 8, 2) == mappings[1][6][8]
+    assert mapper.get_mapping(5, 4, 2) == mappings[1][5][4]
 
     assert mapper.get_mapping(1, 1, 3) == mappings[2][1][1]
-    assert mapper.get_mapping(3, 7, 3) == mappings[2][3][7]
-    assert mapper.get_mapping(4, 8, 3) == mappings[2][4][8]
 
 def test_multiple_file_csv_deserialization():
     rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
@@ -379,15 +376,12 @@ def test_multiple_file_csv_deserialization():
     mappings = csv_serializer.deserialize(os.path.join("Data", "multi_line.csv"))
     assert mapper.get_mapping(1, 1, 1) == mappings[0][1][1]
     assert mapper.get_mapping(2, 2, 1) == mappings[0][2][2]
-    assert mapper.get_mapping(8, 8, 1) == mappings[0][8][8]
+    assert mapper.get_mapping(7, 7, 1) == mappings[0][7][7]
 
     assert mapper.get_mapping(1, 1, 2) == mappings[1][1][1]
-    assert mapper.get_mapping(5, 7, 2) == mappings[1][5][7]
-    assert mapper.get_mapping(6, 8, 2) == mappings[1][6][8]
+    assert mapper.get_mapping(5, 4, 2) == mappings[1][5][4]
 
     assert mapper.get_mapping(1, 1, 3) == mappings[2][1][1]
-    assert mapper.get_mapping(3, 7, 3) == mappings[2][3][7]
-    assert mapper.get_mapping(4, 8, 3) == mappings[2][4][8]
 
 def test_graph_building_via_deserialization():
     rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
@@ -408,15 +402,16 @@ def test_graph_building_via_deserialization():
 
     assert mapper.get_mapping(1, 1, 1) == mappings[0][1][1]
     assert mapper.get_mapping(2, 2, 1) == mappings[0][2][2]
-    assert mapper.get_mapping(8, 8, 1) == mappings[0][8][8]
+    assert mapper.get_mapping(7, 7, 1) == mappings[0][7][7]
 
     assert mapper.get_mapping(1, 1, 2) == mappings[1][1][1]
-    assert mapper.get_mapping(5, 7, 2) == mappings[1][5][7]
-    assert mapper.get_mapping(6, 8, 2) == mappings[1][6][8]
+    assert mapper.get_mapping(5, 4, 2) == mappings[1][5][4]
 
     assert mapper.get_mapping(1, 1, 3) == mappings[2][1][1]
-    assert mapper.get_mapping(3, 7, 3) == mappings[2][3][7]
-    assert mapper.get_mapping(4, 8, 3) == mappings[2][4][8]
+
+def Reverse(lst):
+    new_lst = lst[::-1]
+    return new_lst
 
 def test_git_files_as_input():
 
@@ -435,6 +430,7 @@ def test_git_files_as_input():
         str_file_contents = str(filecontents).split("\\n")
         revisions.append(str_file_contents)
 
+    revisions = Reverse(revisions)
     input_source = StubbedInputSource(revisions)
     mapper = SimpleMapper()
     csv_serializer = CsvFileSerializer("Data", "actual_code.csv")
@@ -442,12 +438,13 @@ def test_git_files_as_input():
     slicer = LineSlicer(networkx_graph)
     orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
+    j = 0
 
 
 test_git_files_as_input()
 test_graph_building_via_deserialization()
 test_multiple_file_csv_deserialization()
-test_multiple_file_deserialization()
+test_multiple_file_in_memory_deserialization()
 test_deserialization()
 test_with_actual_files()
 test_check_displacement()
