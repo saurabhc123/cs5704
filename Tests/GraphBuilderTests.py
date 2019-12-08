@@ -360,7 +360,7 @@ def test_multiple_file_in_memory_deserialization():
 
     assert mapper.get_mapping(1, 1, 3) == mappings[2][1][1]
 
-def test_multiple_file_csv_deserialization():
+def test_multiple_file_csv_based_deserialization():
     rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
     rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
     rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
@@ -441,10 +441,11 @@ def test_git_files_as_input():
     beginning = orchestrator.orchestrate()
     j = 0
 
+# Just adding a few more changes for the code to test the code changes.
 
 test_git_files_as_input()
 test_graph_building_via_deserialization()
-test_multiple_file_csv_deserialization()
+test_multiple_file_csv_based_deserialization()
 test_multiple_file_in_memory_deserialization()
 test_deserialization()
 test_with_actual_files()
@@ -455,3 +456,5 @@ test_right_addition()
 test_blanks()
 large_test()
 test_multiple_files()
+
+# This is the end of the tests.
