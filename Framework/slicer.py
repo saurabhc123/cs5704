@@ -18,3 +18,9 @@ class Slicer(ABC):
 
     def slice(self, revision_number: int, line_number: int):
         pass
+
+    def slice_line_updated(self, starting_revision: int, ending_revision: int, starting_line: int, ending_line: int, between: bool):
+        pass
+
+    def slice_updated(self, starting_revision: int, ending_revision: int, starting_line: int, ending_line: int, between: bool):
+        pass

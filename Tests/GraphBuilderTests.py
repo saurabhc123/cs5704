@@ -268,8 +268,11 @@ def test_multiple_files():
     orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer)
     beginning = orchestrator.orchestrate()
     print(beginning[2][4].label)
-    nodes, content = orchestrator.slice(3, 5)
-    print(content)
+    # nodes, content = orchestrator.slice(3, 5)
+    # print(content)
+
+    nodes, content = orchestrator.slice_updated(4, 1, 1, 4, True)
+    print(sorted(content))
 
 
 def test_serialization():
@@ -443,18 +446,18 @@ def test_git_files_as_input():
 
 # Just adding a few more changes for the code to test the code changes.
 
-test_git_files_as_input()
-test_graph_building_via_deserialization()
-test_multiple_file_csv_based_deserialization()
-test_multiple_file_in_memory_deserialization()
-test_deserialization()
-test_with_actual_files()
-test_check_displacement()
-test_mutation_of_lines()
-test_serialization()
-test_right_addition()
-test_blanks()
-large_test()
+# test_git_files_as_input()
+# test_graph_building_via_deserialization()
+# test_multiple_file_csv_based_deserialization()
+# test_multiple_file_in_memory_deserialization()
+# test_deserialization()
+# test_with_actual_files()
+# test_check_displacement()
+# test_mutation_of_lines()
+# test_serialization()
+# test_right_addition()
+# test_blanks()
+# large_test()
 test_multiple_files()
 
 # This is the end of the tests.

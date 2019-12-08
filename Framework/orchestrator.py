@@ -34,3 +34,6 @@ class Orchestrator:
 
     def slice(self, revision_number, line_number):
         return self.slicer.slice(revision_number, line_number)
+
+    def slice_updated(self, starting_revision: int, ending_revision: int, starting_line: int, ending_line: int, between: bool):
+        return self.slicer.slice_updated(starting_revision, ending_revision, starting_line, ending_line, between)
