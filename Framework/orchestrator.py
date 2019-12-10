@@ -39,9 +39,9 @@ class Orchestrator:
     def get_revisions(self):
         return self.revisions
 
-    def visualize(self, arranged_slices, forwards = True):
+    def visualize(self, arranged_slices, nodes, content_ids, forwards = True):
         if arranged_slices is not None:
-            self.visualizer.visualize(arranged_slices, self.revisions, forwards)
+            self.visualizer.visualize(arranged_slices, nodes, content_ids, self.revisions, forwards)
 
     def slice(self, revision_number, line_number):
         return self.slicer.slice(revision_number, line_number)

@@ -461,7 +461,7 @@ def test_git_url_as_input():
     j = 0
 
 def test_multiple_files_with_git_url_as_input():
-    input_url = "https://github.com/saurabhc123/cs5704/blob/master/Tests/GraphBuilderTests.py"
+    input_url = "https://github.com/saurabhc123/cs5704/blob/master/Framework/orchestrator.py"
     input_source = GitInputSource(input_url)
     mapper = SimpleMapper()
     csv_serializer = CsvFileSerializer("Data", "git_url_code.csv")
@@ -471,7 +471,53 @@ def test_multiple_files_with_git_url_as_input():
     orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer, visualizer)
     beginning = orchestrator.orchestrate()
 
-    nodes, content, arranged_slices = orchestrator.slice_updated(1, 4, 4, 12, True)
+    with open('revisions.txt', 'w') as f:
+        for item in orchestrator.get_revisions():
+            f.write("%s\n" % item)
+
+    nodes, content, arranged_slices = orchestrator.slice_updated(2, 6, 12, 16, True)
+
+    with open('slice.txt', 'w') as f:
+        for item in content.keys():
+            f.write("%s: " % item)
+            for n in content[item]:
+                f.write("%s," % n)
+            f.write("\n")
+
+    orchestrator.visualize(arranged_slices, nodes, content)
+
+def test_main_evaluation_test():
+    input_url = "https://github.com/ajp2455/fed-client/blob/master/main.go"
+    input_source = GitInputSource(input_url)
+    mapper = SimpleMapper()
+    csv_serializer = CsvFileSerializer("Data", "git_url_code_evaluation.csv")
+    networkx_graph = NetworkxGraph(csv_serializer)
+    slicer = LineSlicer(networkx_graph)
+    visualizer = CommandLineVisualizer()
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer, visualizer)
+    beginning = orchestrator.orchestrate()
+
+    nodes, content, arranged_slices = orchestrator.slice_updated(8, 4, 270, 280, True)
+    orchestrator.visualize(arranged_slices, nodes, content, True)
+
+def test_multiple_files_recreate_bug():
+    # input_url = "https://github.com/saurabhc123/cs5704/blob/master/Tests/GraphBuilderTests.py"
+    # input_source = GitInputSource(input_url)
+    rev1 = ReadTextFromFile("Data/dummy_test_rev1.txt")
+    rev2 = ReadTextFromFile("Data/dummy_test_rev2.txt")
+    rev3 = ReadTextFromFile("Data/dummy_test_rev3.txt")
+    rev4 = ReadTextFromFile("Data/dummy_test_rev4.txt")
+    revisions = [rev1, rev2, rev3, rev4]
+    input_source = StubbedInputSource(revisions)
+    mapper = SimpleMapper()
+    csv_serializer = CsvFileSerializer("Data", "debug.csv")
+    networkx_graph = NetworkxGraph(csv_serializer)
+    slicer = LineSlicer(networkx_graph)
+    visualizer = CommandLineVisualizer()
+    orchestrator = Orchestrator(input_source, mapper, networkx_graph, slicer, visualizer)
+    beginning = orchestrator.orchestrate()
+
+    nodes, content, arranged_slices = orchestrator.slice_updated(1, 4, 4, 88, True)
     orchestrator.visualize(arranged_slices)
 
 # Just adding a few more changes for the code to test the code changes.
@@ -490,5 +536,7 @@ def test_multiple_files_with_git_url_as_input():
 # large_test()
 # test_multiple_files()
 test_multiple_files_with_git_url_as_input()
+# test_multiple_files_recreate_bug()
+# test_main_evaluation_test()
 
 # This is the end of the tests.

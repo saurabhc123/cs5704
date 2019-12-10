@@ -3,6 +3,14 @@ from Framework.slicer import Slicer
 from Framework.graph import Graph
 from Framework.node import Node
 
+class RoundFloat(float):
+    def __new__(cls, value=0, places=2):
+        return float.__new__(cls, value)
+    def __init__(self, value=0, places=2):
+        self.places = str(places)
+    def __str__(self):
+        return ("%." + self.places + "f") % self
+    __repr__ = __str__
 
 class LineSlicer(Slicer):
 
@@ -38,7 +46,7 @@ class LineSlicer(Slicer):
             slicing_dict_content_by_id[s_index] = []
             self.handle_successors(s, slicing_dict_nodes, slicing_dict_content_by_id)
 
-        self.create_slice_subgraph(slicing_dict_nodes)
+        self.create_slice_subgraph(slicing_dict_nodes, slicing_dict_content_by_id)
 
         return slicing_dict_nodes, slicing_dict_content_by_id
 
@@ -68,22 +76,29 @@ class LineSlicer(Slicer):
                     break
                 self.handle_predecessors(p, nodes_dict, content_dict, ending_revision)
 
-    def create_slice_subgraph(self, slicing_dict_nodes: dict):
+    def create_slice_subgraph(self, slicing_dict_nodes: dict(), slicing_dict_content_by_id: dict()):
         self.sub_graph: Graph = self.G
         self.sub_graph.clear()
 
         nodes = list(slicing_dict_nodes.keys())
+        ids = list(slicing_dict_content_by_id.keys())
 
-        for n in nodes:
-            self.sub_graph.add_node(n, node_id=n.get_node_id())
+        if nodes is not None:
+            for n, c in zip(nodes, ids):
+                if n is not None and c is not None:
+                    self.sub_graph.add_node(n, node_id=c)
 
-        for n in nodes:
-            nodes_succs = slicing_dict_nodes[n]
-            curr_node = self.sub_graph.find_node_in_graph(n.get_node_id())
+            for n, c in zip(nodes, ids):
+                if n is not None and c is not None:
+                    nodes_succs = slicing_dict_nodes[n]
+                    curr_node = self.sub_graph.find_node_in_graph(c)
 
-            for s in nodes_succs:
-                succ_node = self.sub_graph.find_node_in_graph(s.get_node_id())
-                self.sub_graph.add_edge(curr_node, succ_node)
+                if len(nodes_succs) > 0:
+                    for s in nodes_succs:
+                        if s is not None:
+                            succ_node = self.sub_graph.find_node_in_graph(s.get_node_id())
+                            if succ_node is not None:
+                                self.sub_graph.add_edge(curr_node, succ_node)
 
     def slice(self, revision_number, line_number):
         nodes, content_id = self.slice_line(revision_number, line_number)
@@ -152,21 +167,25 @@ class LineSlicer(Slicer):
                             direct_successors.append(s)
                     direct_successors.sort()
                     if len(direct_successors) > 0:
+                        first_line_number = direct_successors[0].split(".")[1]
                         first_node = float(direct_successors[0])
                         last_node = float(direct_successors[len(direct_successors) - 1])
-                        i = round(first_node + 0.1, 1)
+                        i = RoundFloat(first_node + pow(0.1, len(first_line_number)), places=len(first_line_number)) # NEED TO FIX FOR TRAILING 0s
                         while i < last_node:
                             found = False
+                            node_index = None
                             for k in slicing_dict_content_by_id.keys():
                                 if str(i) == k:
                                     found = True
                                     break
                             if found is False:
-                                curr_node = self.G.find_node_in_graph(str(i))
                                 curr_node_index = str(i)
+                                node_index = self.G.find_node_in_graph(curr_node_index)
                                 slicing_dict_content_by_id[curr_node_index] = []
-                            i = round(i + 0.1, 1)
-                        self.handle_between(direct_successors, slicing_dict_content_by_id)
+                                if node_index is not None:
+                                    slicing_dict_nodes[node_index] = []
+                            i = RoundFloat(i + pow(0.1, len(first_line_number)), places=len(first_line_number))
+                        self.handle_between(direct_successors, slicing_dict_content_by_id, slicing_dict_nodes)
             else:
                 for p in self.G.predecessors(starting_node):
                     if p is not None:
@@ -202,25 +221,28 @@ class LineSlicer(Slicer):
                                 between_nodes.append(n)
                     between_nodes.sort()
                     if len(between_nodes) > 0:
+                        first_line_number = between_nodes[0].split(".")[1]
                         first_node = float(between_nodes[0])
                         last_node = float(between_nodes[len(between_nodes) - 1])
-                        i = round(first_node + 0.1, 1)
+                        i = RoundFloat(first_node + pow(0.1, len(first_line_number)), places=len(first_line_number))
                         while i < last_node:
                             found = False
+                            node_index = None
                             for k in slicing_dict_content_by_id.keys():
                                 if str(i) == k:
                                     found = True
                                     break
                             if found is False:
-                                curr_node = self.G.find_node_in_graph(str(i))
                                 curr_node_index = str(i)
+                                node_index = self.G.find_node_in_graph(curr_node_index)
                                 slicing_dict_content_by_id[curr_node_index] = []
-                            i = round(i + 0.1, 1)
-                        self.handle_between(between_nodes, slicing_dict_content_by_id)
+                                if node_index is not None:
+                                    slicing_dict_nodes[node_index] = []
+                            i = RoundFloat(i + pow(0.1, len(first_line_number)), places=len(first_line_number))
+                        self.handle_between(between_nodes, slicing_dict_content_by_id, slicing_dict_nodes)
 
-            print(slicing_dict_content_by_id)
             arranged_slices = self.arrange_slices(slicing_dict_content_by_id)
-            # self.create_slice_subgraph(slicing_dict_nodes)
+            self.create_slice_subgraph(slicing_dict_nodes, slicing_dict_content_by_id)
 
             return slicing_dict_nodes, slicing_dict_content_by_id, arranged_slices
         return None, None, None
@@ -230,7 +252,7 @@ class LineSlicer(Slicer):
         nodes, content_id, arranged_slices = self.slice_line_updated(starting_revision, ending_revision, starting_line, ending_line, between)
         return nodes, content_id, arranged_slices
 
-    def handle_between(self, successors: [str], slicing_dict_content_by_id:dict()):
+    def handle_between(self, successors: [str], slicing_dict_content_by_id: dict(), slicing_dict_nodes: dict()):
         direct_successors = []
         for succ in successors:
             if succ in slicing_dict_content_by_id.keys():
@@ -239,32 +261,41 @@ class LineSlicer(Slicer):
                     direct_successors.append(s)
         direct_successors.sort()
         if len(direct_successors) > 0:
+            first_line_number = direct_successors[0].split(".")[1]
+            # last_line_number = direct_successors[len(direct_successors) - 1].split(".")[1]
             first_node = float(direct_successors[0])
             last_node = float(direct_successors[len(direct_successors) - 1])
-            i = round(first_node + 0.1, 1)
+            i = RoundFloat(first_node + pow(0.1, len(first_line_number)), places=len(first_line_number))
             while i < last_node:
                 found = False
+                node_index = None
                 for k in slicing_dict_content_by_id.keys():
                     if str(i) == k:
                         found = True
                         break
                 if found is False:
                     curr_node_index = str(i)
+                    node_index = self.G.find_node_in_graph(curr_node_index)
                     slicing_dict_content_by_id[curr_node_index] = []
-                i = round(i + 0.1, 1)
+                    if node_index is not None:
+                        slicing_dict_nodes[node_index] = []
+                i = RoundFloat(i + pow(0.1, len(first_line_number)), places=len(first_line_number))
         if len(direct_successors) > 0:
-            self.handle_between(direct_successors, slicing_dict_content_by_id)
+            self.handle_between(direct_successors, slicing_dict_content_by_id, slicing_dict_nodes)
 
     def arrange_slices(self, slicing_dict_content_by_id: dict()):
         keys = sorted(slicing_dict_content_by_id)
+        curr_revision_number_set = keys[0].split(".")[0]
         index = 0
         revisions = [[]]
         for k in keys:
-            rev_number = int(k.split(".")[0])
-            if rev_number == index + 1:
+            rev_number = k.split(".")[0]
+            if rev_number == curr_revision_number_set:
                 revisions[index].append(k)
-            elif rev_number > index + 1:
+                continue
+            elif rev_number > curr_revision_number_set:
                 revisions.append([])
                 index = index + 1
                 revisions[index].append(k)
+                curr_revision_number_set = rev_number
         return revisions
